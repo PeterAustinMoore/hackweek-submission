@@ -7,6 +7,7 @@ $ch = curl_init();
 
 //set the url, number of POST vars, POST data
 curl_setopt($ch,CURLOPT_URL, $url);
+curl_setopt($ch,CURLOPT_POST,"");
 $result = curl_exec($ch);
 $access_token = json_decode($result);
 echo $access_token["access_token"];

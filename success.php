@@ -16,7 +16,7 @@ function getAccessCode($u) {
   curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
   $result = curl_exec($c);
   $header_size = curl_getinfo($c,CURLINFO_HEADER_SIZE);
-  $header = substr(substr($result, 0, $header_size),31,34);
+  $header = substr(substr($result, 0, $header_size),34,3);
   echo $header;
   $body = substr($result, $header_size);
   if($header == 400) {

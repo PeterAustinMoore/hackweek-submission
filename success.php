@@ -14,9 +14,8 @@ function getAccessCode($u) {
   curl_setopt($c,CURLOPT_POSTFIELDS,$fields);
   $result = curl_exec($c);
   curl_close($c);
-  $d = json_decode($result);
-  $a = $d->access_token;
-  return $a;
+  $d = json_decode($result, true);
+  return $d;
 }
 
 $access_token = getAccessCode($url);

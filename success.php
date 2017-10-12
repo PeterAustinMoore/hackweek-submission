@@ -27,6 +27,7 @@ function getUserInfo($u, $a) {
   echo "<script>console.log(`".$u."`)</script>";
   //set the url, number of POST vars, POST data
   curl_setopt($c,CURLOPT_URL, $u);
+  curl_setopt($c,CURLOPT_HTTPHEADER,array('Authorization: OAuth '.$a));
   $result = curl_exec($c);
   curl_close($c);
   $d = json_decode($result, true);

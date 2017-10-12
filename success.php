@@ -14,6 +14,9 @@ function getAccessCode($u) {
   curl_setopt($c,CURLOPT_POSTFIELDS,$fields);
   curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
   $result = curl_exec($c);
+  $header_size = curl_getinfo($c,CURLINFO_HEADER_SIZE);
+  $header = substr($result, 0, $header_size);
+  echo $header;
   curl_close($c);
   $d = json_decode($result, true);
   var_dump($d);

@@ -16,12 +16,11 @@ function getAccessCode($u) {
   $result = curl_exec($c);
   curl_close($c);
   $d = json_decode($result, true);
-  echo $d;
   return $d->access_code;
 }
 
 $access_token = getAccessCode($url);
-
+echo $access_token."<br>";
 function getUserInfo($u, $a) {
   $c = curl_init();
   echo "<script>console.log(`".$u."`)</script>";

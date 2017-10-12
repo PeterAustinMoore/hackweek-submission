@@ -16,9 +16,12 @@ function getAccessCode($u) {
   curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
   $result = curl_exec($c);
   $header_size = curl_getinfo($c,CURLINFO_HEADER_SIZE);
-  $header = substr($result, 0, $header_size);
-  $body = substr($result, $header_size);
+  $header = substr(substr($result, 0, $header_size),31,34);
   echo $header;
+  $body = substr($result, $header_size);
+  if($header == 400) {
+    echo $header;
+  }
   curl_close($c);
   $d = json_decode($body, true);
   var_dump($d);

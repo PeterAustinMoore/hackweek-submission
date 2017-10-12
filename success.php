@@ -20,7 +20,7 @@ function getAccessCode($u) {
 }
 
 $access_token = getAccessCode($url);
-
+var_dump($access_token);
 
 function getUserInfo($u, $a) {
   $c = curl_init();

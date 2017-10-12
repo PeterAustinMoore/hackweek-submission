@@ -20,7 +20,7 @@ function getAccessCode($u) {
   echo $header;
   $body = substr($result, $header_size);
   if($header == 400) {
-    echo $header;
+    header("Location: index.php");
   }
   curl_close($c);
   $d = json_decode($body, true);

@@ -17,4 +17,5 @@ function getAccessCode($c, $u) {
 }
 
 $access_token = getAccessCode($ch, $url);
+echo $access_token;
 ?>

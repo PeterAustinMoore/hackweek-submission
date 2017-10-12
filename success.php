@@ -16,7 +16,7 @@ function getAccessCode($u) {
   $result = curl_exec($c);
   curl_close($c);
   $d = json_decode($result, true);
-  return $d->access_code;
+  return $d["access_code"];
 }
 
 $access_token = getAccessCode($url);

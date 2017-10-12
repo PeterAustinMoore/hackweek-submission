@@ -17,14 +17,12 @@ function getAccessCode($u) {
   $result = curl_exec($c);
   $header_size = curl_getinfo($c,CURLINFO_HEADER_SIZE);
   $header = substr(substr($result, 0, $header_size),34,3);
-  echo $header;
   $body = substr($result, $header_size);
   if($header == 400) {
     header("Location: index.php");
   }
   curl_close($c);
   $d = json_decode($body, true);
-  var_dump($d);
   return $d["access_token"];
 }
 
@@ -44,5 +42,7 @@ function getUserInfo($u, $a) {
 }
 $user = "https://peter.demo.socrata.com/users/current.json";
 $info = getUserInfo($user, $access_token);
-var_dump($info);
+echo "Welcome ".$info["firstName"]."!";
+
+include("grid.php");
 ?>

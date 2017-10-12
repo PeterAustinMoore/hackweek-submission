@@ -12,8 +12,8 @@
 <script src="assets/js/src/bootstrap-table.js"></script>
 
 <!-- Editable -->
-<script src="assets/js/src/extensions/editable/bootstrap-table-editable.js"></script>
 <script src="//rawgit.com/vitalets/x-editable/master/dist/bootstrap3-editable/js/bootstrap-editable.js"></script>
+<script src="assets/js/src/extensions/editable/bootstrap-table-editable.js"></script>
 </head>
 <body>
   <table id="table"

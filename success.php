@@ -16,6 +16,7 @@ function getAccessCode($u) {
   $result = curl_exec($c);
   curl_close($c);
   $d = json_decode($result, true);
+  echo $d;
   return $d->access_code;
 }
 
@@ -35,4 +36,5 @@ function getUserInfo($u, $a) {
 }
 $user = "https://peter.demo.socrata.com/users/current.json";
 $info = getUserInfo($user, $access_token);
+var_dump($info);
 ?>

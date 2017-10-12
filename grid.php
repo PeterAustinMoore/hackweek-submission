@@ -40,6 +40,5 @@
            </tr>
          </thead>
   </table>
-<script src="assets/js/table.js"></script>
 </body>
 </html>

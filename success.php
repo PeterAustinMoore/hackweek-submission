@@ -27,7 +27,6 @@ function getAccessCode($u) {
 }
 
 $access_token = getAccessCode($url);
-echo $access_token."<br>";
 function getUserInfo($u, $a) {
   $c = curl_init();
   echo "<script>console.log(`".$u."`)</script>";
@@ -42,7 +41,7 @@ function getUserInfo($u, $a) {
 }
 $user = "https://peter.demo.socrata.com/users/current.json";
 $info = getUserInfo($user, $access_token);
-echo "Welcome ".$info["firstName"]."!";
+echo "<h1>Welcome, ".$info["firstName"]."!</h1>";
 
 include("grid.php");
 ?>

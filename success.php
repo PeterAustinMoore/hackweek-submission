@@ -20,9 +20,20 @@ function getAccessCode($u) {
 }
 
 $access_token = getAccessCode($url);
-echo $access_token->access_token;
 
-function getUserInfo($c, $u, $a) {
-  return $a;
+
+function getUserInfo($u, $a) {
+  $c = curl_init();
+  echo "<script>console.log(`".$u."`)</script>";
+  //set the url, number of POST vars, POST data
+  curl_setopt($c,CURLOPT_URL, $u);
+  $result = curl_exec($c);
+  curl_close($c);
+  $d = json_decode($result, true);
+  return $d;
 }
+$user = "https://peter.demo.socrata.com/users/current.json";
+
+$info = getUserInfo($user, $access_token);
+var_dump($info);
 ?>

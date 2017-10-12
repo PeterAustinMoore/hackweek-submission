@@ -12,7 +12,7 @@ function getAccessCode($u) {
   curl_setopt($c,CURLOPT_URL, $u);
   curl_setopt($c,CURLOPT_POST,1);
   curl_setopt($c,CURLOPT_POSTFIELDS,$fields);
-  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+  curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
   $result = curl_exec($c);
   curl_close($c);
   $d = json_decode($result, true);
@@ -27,7 +27,7 @@ function getUserInfo($u, $a) {
   //set the url, number of POST vars, POST data
   curl_setopt($c,CURLOPT_URL, $u);
   curl_setopt($c,CURLOPT_HTTPHEADER,array('Authorization: OAuth '.$a));
-  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+  curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
   $result = curl_exec($c);
   curl_close($c);
   $d = json_decode($result, true);

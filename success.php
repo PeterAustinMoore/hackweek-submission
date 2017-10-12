@@ -12,15 +12,14 @@ function getAccessCode($u) {
   curl_setopt($c,CURLOPT_URL, $u);
   curl_setopt($c,CURLOPT_POST,1);
   curl_setopt($c,CURLOPT_POSTFIELDS,$fields);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
   $result = curl_exec($c);
   curl_close($c);
-  //$d = json_decode($result, true);
-  $d = "j3tmjdGHUs6p2fb2OqY3WafkzSAta7mV7QAN";
-  return $d;
+  $d = json_decode($result, true);
+  return $d->access_code;
 }
 
 $access_token = getAccessCode($url);
-echo $access_token;
 
 function getUserInfo($u, $a) {
   $c = curl_init();
@@ -28,6 +27,7 @@ function getUserInfo($u, $a) {
   //set the url, number of POST vars, POST data
   curl_setopt($c,CURLOPT_URL, $u);
   curl_setopt($c,CURLOPT_HTTPHEADER,array('Authorization: OAuth '.$a));
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
   $result = curl_exec($c);
   curl_close($c);
   $d = json_decode($result, true);

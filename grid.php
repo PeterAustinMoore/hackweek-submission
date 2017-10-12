@@ -11,9 +11,6 @@
   <!-- Latest compiled and minified JavaScript -->
   <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.1/bootstrap-table.min.js"></script>
 
-  <!-- Latest compiled and minified Locales -->
-  <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.1/locale/bootstrap-table-zh-CN.min.js"></script>
-
 <link href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet"/>
 <script src="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/js/bootstrap-editable.min.js"></script>
 <script>
@@ -37,7 +34,7 @@
          data-response-handler="responseHandler">
          <thead>
            <tr>
-             <th data-field="metric"></th>
+             <th data-field="metric">Metric</th>
              <th data-field="goal" width="200">Goal</th>
              <th data-field="q1" data-editable="true">Q1</th>
              <th data-field="q2">Q2</th>
@@ -45,6 +42,16 @@
              <th data-field="q4">Q4</th>
            </tr>
          </thead>
+         <tr>
+           <td>Metric 1</td>
+           <td>Goal 1</td>
+           <td>100</td>
+         </tr>
+         <tr>
+           <td></td>
+           <td>Goal 2</td>
+           <td>50</td>
+         </tr>
   </table>
 </body>
 </html>

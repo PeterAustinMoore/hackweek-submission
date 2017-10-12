@@ -34,7 +34,5 @@ function getUserInfo($u, $a) {
   return $d;
 }
 $user = "https://peter.demo.socrata.com/users/current.json";
-
 $info = getUserInfo($user, $access_token);
-var_dump($info);
 ?>

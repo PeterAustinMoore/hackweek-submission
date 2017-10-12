@@ -17,9 +17,10 @@ function getAccessCode($u) {
   $result = curl_exec($c);
   $header_size = curl_getinfo($c,CURLINFO_HEADER_SIZE);
   $header = substr($result, 0, $header_size);
+  $body = substr($result, $header_size);
   echo $header;
   curl_close($c);
-  $d = json_decode($result, true);
+  $d = json_decode($body, true);
   var_dump($d);
   return $d["access_token"];
 }

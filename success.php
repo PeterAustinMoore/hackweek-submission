@@ -5,6 +5,7 @@ $url="https://peter.demo.socrata.com/oauth/access_token?client_id=M45QwgboTFjF2a
 
 $ch = curl_init();
 function getAccessCode($c, $u) {
+  echo "<script>console.log(".$u.")</script>";
   $fields=array("empty"=>"");
   //set the url, number of POST vars, POST data
   curl_setopt($c,CURLOPT_URL, $u);
@@ -18,4 +19,8 @@ function getAccessCode($c, $u) {
 
 $access_token = getAccessCode($ch, $url);
 echo $access_token;
+
+function getUserInfo($c, $u, $a) {
+  return $a;
+}
 ?>

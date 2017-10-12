@@ -1,7 +1,7 @@
 <?php
 $code=$_GET["code"];
 $s=getenv("client_id");
-$url="https://peter.demo.socrata.com/oauth/access_token?client_id=M45QwgboTFjF2aPVUUfYs5mtt&client_secret=".$s."&grant_type=authorization_code&redirect_uri=https://performance-ingress.herokuapp.com/success.php&code=".urlencode($code);
+$url="https://peter.demo.socrata.com/oauth/access_token?client_id=M45QwgboTFjF2aPVUUfYs5mtt&client_secret=".$s."&grant_type=authorization_code&redirect_uri=https://performance-ingress.herokuapp.com/success.php&code=".$code;
 
 
 function getAccessCode($u) {
@@ -20,7 +20,7 @@ function getAccessCode($u) {
 }
 
 $access_token = getAccessCode($url);
-echo $access_token;
+echo $access_token->access_token;
 
 function getUserInfo($c, $u, $a) {
   return $a;

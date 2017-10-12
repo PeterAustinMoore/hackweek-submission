@@ -55,11 +55,17 @@
            <td>Metric 1</td>
            <td>Goal 1</td>
            <td>100</td>
+           <td>50</td>
+           <td>-</td>
+           <td>-</td>
          </tr>
          <tr>
            <td></td>
            <td>Goal 2</td>
            <td>50</td>
+           <td>50</td>
+           <td>-</td>
+           <td>-</td>
          </tr>
   </table>
 </body>

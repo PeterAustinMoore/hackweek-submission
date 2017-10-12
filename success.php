@@ -10,7 +10,7 @@ function getAccessCode($c, $u) {
   curl_setopt($c,CURLOPT_URL, $u);
   curl_setopt($c,CURLOPT_POST,1);
   curl_setopt($c,CURLOPT_POSTFIELDS,$fields);
-  $result = curl_exec($ch);
+  $result = curl_exec($c);
   $d = json_decode($result, true);
   $a = $d->{"access_token"};
   return $a;

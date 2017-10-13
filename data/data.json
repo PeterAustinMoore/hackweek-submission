@@ -1,0 +1,15 @@
+[
+    {
+        "id": "metric 1",
+        "name": "Goal 1",
+        "q1": "10"
+    },
+    {
+        "name": "<a href='https://www.google.com' target='_blank'>Goal 2</a>",
+        "q1": "100"
+    },
+    {
+        "name": "Goal 3",
+        "q1": "20"
+    }
+]

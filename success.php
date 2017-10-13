@@ -25,8 +25,13 @@ function getAccessCode($u) {
   $d = json_decode($body, true);
   return $d["access_token"];
 }
+if(!isset($_COOKIE["access_token"])) {
+  $access_token = getAccessCode($url);
+  setcookie("access_token", $access_token, time()+3600);
+} else {
+  $access_token = $_COOKIE["access_token"];
+}
 
-$access_token = getAccessCode($url);
 function getUserInfo($u, $a) {
   $c = curl_init();
   echo "<script>console.log(`".$u."`)</script>";

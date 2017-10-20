@@ -94,7 +94,7 @@
                         <div class="col-md-12">
                             <div class="card">
                               <div class="content">
-                                <input type="submit" />
+                                <input type="submit" value="Approve" />
                               </div>
                             </div>
                           </div>

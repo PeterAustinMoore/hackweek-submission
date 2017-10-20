@@ -110,16 +110,18 @@ $department_selection .= "</select>";
 
           <div class="content">
               <div class="container-fluid">
-                  <div class="row">
-                      <div class="col-md-12">
-                          <div class="card">
-                              <form>
-                                  <input type="text" id="department" placeholder="User Email">
-                                <input type="button" class="add-row" value="Add User">
-                              </form>
-                            </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                          <div class="content">
+                            <form>
+                                <input type="text" id="users" placeholder="User Email">
+                              <input type="button" class="add-row" value="Add Users">
+                            </form>
                           </div>
                         </div>
+                      </div>
+                    </div>
                               <form name="departments" method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
                                 <div class="row">
                                     <div class="col-md-12">

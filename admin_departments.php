@@ -129,14 +129,12 @@ if(isset($_POST["department"])) {
                         </div>
                       </div>
                     </div>
-
-                      <form name="departments" method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
-
+                    <form name="departments" method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
                       <div class="row">
                           <div class="col-md-12">
                               <div class="card">
-                                <div = "content">
-                                  <input type="submit" value="Save" />
+                                <div class="content">
+                                  <input type="submit" />
                                 </div>
                               </div>
                             </div>
@@ -165,7 +163,7 @@ if(isset($_POST["department"])) {
                                       $data = json_decode($r, true);
                                       $tbody = "";
                                       for ($i = 0; $i < count($data); $i++) {
-                                        $tbody.="<tr><td><button></button></td><td>".$data[$i]["departmentid"]."</td><td><input name='department[".$data[$i]["departmentid"]."]' type='text' value='".$data[$i]["department"]."' /></td></tr>";
+                                        $tbody.="<tr><td><input type='checkbox' /></td><td>".$data[$i]["departmentid"]."</td><td><input name='department[".$data[$i]["departmentid"]."]' type='text' value='".$data[$i]["department"]."' /></td></tr>";
                                       }
                                       echo $tbody;
                                       }
@@ -185,12 +183,6 @@ if(isset($_POST["department"])) {
 <!--   Core JS Files   -->
 <script src="assets/js/jquery-1.10.2.js" type="text/javascript"></script>
 <script src="assets/js/bootstrap.min.js" type="text/javascript"></script>
-
-<!--  Checkbox, Radio & Switch Plugins -->
-<script src="assets/js/bootstrap-checkbox-radio.js"></script>
-
-<!--  Charts Plugin -->
-<script src="assets/js/chartist.min.js"></script>
 
 <!--  Notifications Plugin    -->
 <script src="assets/js/bootstrap-notify.js"></script>

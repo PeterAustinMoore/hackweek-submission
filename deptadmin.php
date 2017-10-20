@@ -1,5 +1,5 @@
 <?php
-$url = 'https://peter.demo.socrata.com/resource/mnj2-zafk.json';
+$url = 'https://peter.demo.socrata.com/resource/6z67-xud9.json';
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_URL, $url);
@@ -13,6 +13,8 @@ foreach($departments as $department) {
 }
 $department_selection .= "</select>";
   ?>
+
+
   <html>
   <head>
   <!-- JQUERY BABY -->
@@ -67,19 +69,13 @@ $department_selection .= "</select>";
 
                 <ul class="nav">
                   <li class="active">
-                      <a href="admin.php">
+                      <a href="#">
                           <i class="ti-user"></i>
                           <p>Users</p>
                       </a>
                   </li>
                     <li>
-                        <a href="admin_departments.php">
-                            <i class="ti-view-list-alt"></i>
-                            <p>Departments</p>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="admin_grid.php">
+                        <a href="deptadmin_grid.php">
                             <i class="ti-view-list-alt"></i>
                             <p>Approve Data</p>
                         </a>
@@ -120,19 +116,19 @@ $department_selection .= "</select>";
                             </div>
                           </div>
                         </div>
-                              <form name="departments" method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <div class="card">
-                                          <div class="content">
-                                            <input type="submit" />
-                                          </div>
-                                        </div>
-                                      </div>
+                        <form name="departments" method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
+                          <div class="row">
+                              <div class="col-md-12">
+                                  <div class="card">
+                                    <div class="content">
+                                      <input type="submit" />
                                     </div>
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <div class="card">
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="row">
+                                  <div class="col-md-12">
+                                      <div class="card">
                               <div class="content table-responsive table-full-width">
                                   <table id="users" class="table table-striped">
                                     <thead>

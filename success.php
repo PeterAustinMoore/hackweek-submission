@@ -47,6 +47,4 @@ function getUserInfo($u, $a) {
 $user = "https://peter.demo.socrata.com/users/current.json";
 $info = getUserInfo($user, $access_token);
 echo "<h1>Welcome, ".$info["firstName"]."!</h1>";
-
-include("grid.php");
 ?>

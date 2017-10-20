@@ -66,7 +66,7 @@ $department_selection .= "</select>";
                 </div>
 
                 <ul class="nav">
-                  <li class="active">
+                  <li>
                       <a href="admin.php">
                           <i class="ti-user"></i>
                           <p>Users</p>
@@ -78,8 +78,8 @@ $department_selection .= "</select>";
                             <p>Departments</p>
                         </a>
                     </li>
-                    <li>
-                        <a href="admin_grid.php">
+                    <li class="active">
+                        <a href="#">
                             <i class="ti-view-list-alt"></i>
                             <p>Approve Data</p>
                         </a>
@@ -109,67 +109,66 @@ $department_selection .= "</select>";
 
 
           <div class="content">
+            <form name="departments" method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
               <div class="container-fluid">
-                  <div class="row">
-                      <div class="col-md-12">
-                          <div class="card">
-                              <form>
-                                  <input type="text" id="department" placeholder="User Email">
-                                <input type="button" class="add-row" value="Add User">
-                              </form>
-                            </div>
-                          </div>
-                        </div>
-                              <form name="departments" method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <div class="card">
-                                          <div class="content">
-                                            <input type="submit" />
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <div class="card">
-                              <div class="content table-responsive table-full-width">
-                                  <table id="users" class="table table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>Remove</th>
-                                            <th>User ID</th>
-                                            <th>User</th>
-                                            <th>Department</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                      <?php
-                                      $ch = curl_init();
-                                      $url = 'https://peter.demo.socrata.com/resource/mnj2-zafk.json?$order=departmentid%20asc';
-                                      if(!isset($_POST["departments"])) {
-                                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                                        curl_setopt($ch, CURLOPT_URL, $url);
-                                        $r = curl_exec($ch);
-                                        $data = json_decode($r, true);
-                                        $tbody = "";
-                                        for ($i = 0; $i < count($data); $i++) {
-                                          $tbody.="<tr><td><button></button></td><td>".$data[$i]["departmentid"]."</td><td><input name='department[".$data[$i]["departmentid"]."]' type='text' value='".$data[$i]["department"]."' /></td></tr>";
-                                        }
-                                        echo $tbody;
-                                        }
-                                       ?>
-                                    </tbody>
-                                </table>
-                              </div>
-                              </form>
-                            </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                          <div class="content">
+                            <input type="submit" />
                           </div>
                         </div>
                       </div>
                     </div>
+                  <div class="row">
+                      <div class="col-md-12">
+                          <div class="card">
+                              <div class="header">
+                                  <h4 class="title">Striped Table</h4>
+                                  <p class="category">Here is a subtitle for this table</p>
+                              </div>
+                              <div class="content table-responsive table-full-width">
+                                  <table class="table table-striped">
+                                      <thead>
+                                          <th>Goal ID</th>
+                                        <th>Goal Name</th>
+                                        <th>Target</th>
+                                        <th>Q1</th>
+                                        <th>Q2</th>
+                                        <th>Q3</th>
+                                        <th>Q4</th>
+                                      </thead>
+                                      <tbody>
+                                          <tr>
+                                            <td>1</td>
+                                            <td>Percent of Completion</td>
+                                            <td>100</td>
+                                            <td>100</td>
+                                            <td>96</td>
+                                            <td><input type="text" name='department' value="New Value" /></td>
+                                            <td></td>
+                                          </tr>
+                                          <tr>
+                                            <td>2</td>
+                                            <td>Number of Incidents</td>
+                                            <td>5</td>
+                                            <td>3</td>
+                                            <td>2</td>
+                                            <td><input type="text" name='department' value="New Value" /></td>
+                                            <td></td>
+                                          </tr>
+                                      </tbody>
+                                  </table>
+
+                              </div>
+                          </div>
+                      </div>
                   </div>
-                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
   </body>
   <!--   Core JS Files   -->
   <script src="assets/js/jquery-1.10.2.js" type="text/javascript"></script>

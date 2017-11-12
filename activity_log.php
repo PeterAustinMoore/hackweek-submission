@@ -127,7 +127,7 @@ if(isset($_POST["department"])) {
                         <p>Users</p>
                     </a>
                 </li>
-                  <li class="active">
+                  <li>
                       <a href="#">
                           <i class="ti-view-list-alt"></i>
                           <p>Departments</p>
@@ -151,7 +151,7 @@ if(isset($_POST["department"])) {
                           <p>Narratives</p>
                       </a>
                   </li>
-                  <li>
+                  <li class="active">
                       <a href="activity_log.php">
                           <i class="ti-view-list-alt"></i>
                           <p>Activity Log</p>
@@ -196,75 +196,37 @@ if(isset($_POST["department"])) {
                       </div>
                     </div>
                     <form autocomplete="off" name="departments" method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
-                      <div class="row">
-                          <div class="col-md-12">
-                              <div class="card">
-                                <div class="content">
-                                  <input type="submit" value="Update" />
-                                  <button id="see_removed">View Removed</button>
-                                  <button id="see_current">Return</button>
-                                  <a style="float:right" href="https://peter.demo.socrata.com/dataset/Admin-Emails/6z67-xud9">View Dataset</a>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
                     <div class="row">
                         <div class="col-md-12">
                             <div class="card">
                               <div class="content table-responsive table-full-width">
-                                <table id="users" class="table table-striped">
+                                <table id="activities" class="table table-striped">
                                   <thead>
                                       <tr>
-                                          <th>Remove</th>
-                                          <th>Department ID</th>
+                                          <th>Activity Type</th>
+                                          <th>Timestamp</th>
                                           <th>Department</th>
+                                          <th>Message</th>
                                       </tr>
                                   </thead>
                                   <tbody>
                                     <?php
                                     $ch = curl_init();
-                                    $url = 'https://peter.demo.socrata.com/resource/6z67-xud9.json?$order=departmentid%20asc&$where=isdeleted='."'false'";
-                                    if(!isset($_POST["departments"])) {
+                                    $url = 'https://peter.demo.socrata.com/resource/ymsm-cbme.json?$order=date%20desc';
                                       curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                                       curl_setopt($ch, CURLOPT_URL, $url);
                                       $r = curl_exec($ch);
                                       $data = json_decode($r, true);
                                       $tbody = "";
-                                      for ($i = 0; $i < count($data); $i++) {
-                                        $tbody.="<tr><td><input name='delete[".$data[$i]["departmentid"]."]' type='checkbox' /></td><td id='deptId'>".$data[$i]["departmentid"]."</td><td><input name='department[".$data[$i]["departmentid"]."]' type='text' value='".$data[$i]["department"]."' /></td></tr>";
+                                      $max = count($data);
+                                      for ($i = 0; $i < $max; $i++) {
+                                        $tbody.="<tr><td>".$data[$i]["activity_type"]."</td><td>".$data[$i]["date"]."</td><td>".$data[$i]["user"]."</td><td>".$data[$i]["message"]."</td></tr>";
                                       }
                                       echo $tbody;
-                                      }
                                      ?>
                                   </tbody>
                               </table>
-                              <table id="users_removed" class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Add Back</th>
-                                        <th>Department ID</th>
-                                        <th>Department</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                  <?php
-                                  $ch = curl_init();
-                                  $url = 'https://peter.demo.socrata.com/resource/6z67-xud9.json?$order=departmentid%20asc&$where=isdeleted='."'true'";
-                                  if(!isset($_POST["departments"])) {
-                                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                                    curl_setopt($ch, CURLOPT_URL, $url);
-                                    $r = curl_exec($ch);
-                                    $data = json_decode($r, true);
-                                    $tbody = "";
-                                    for ($i = 0; $i < count($data); $i++) {
-                                      $tbody.="<tr><td><input name=delete[".$data[$i]["departmentid"]."] type='hidden' value='deleted' /> <input name='add[".$data[$i]["departmentid"]."]' type='checkbox' /></td><td>".$data[$i]["departmentid"]."</td><td><input name='department[".$data[$i]["departmentid"]."]' type='text' value='".$data[$i]["department"]."' /></td></tr>";
-                                    }
-                                    echo $tbody;
-                                    }
-                                   ?>
-                                </tbody>
-                            </table>
+
                             </div>
                             </form>
                           </div>

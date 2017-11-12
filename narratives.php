@@ -84,13 +84,13 @@
                             <p>Goals</p>
                         </a>
                     </li>
-                    <li class="active">
+                    <li>
                         <a href="#">
                             <i class="ti-view-list-alt"></i>
                             <p>Manage and Approve</p>
                         </a>
                     </li>
-                    <li>
+                    <li class="active">
                         <a href="narratives.php">
                             <i class="ti-view-list-alt"></i>
                             <p>Narratives</p>

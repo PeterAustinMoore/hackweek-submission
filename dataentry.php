@@ -25,10 +25,66 @@
     <!--  CSS for Demo Purpose, don't include it in your project     -->
     <link href="assets/css/demo.css" rel="stylesheet" />
 
+    <!-- JQUERY BABY -->
+    <script
+      src="https://code.jquery.com/jquery-3.2.1.min.js"
+      integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+      crossorigin="anonymous"></script>
+      <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+      integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
+      crossorigin="anonymous"></script>
+
     <!--  Fonts and icons     -->
     <link href="http://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet">
     <link href='https://fonts.googleapis.com/css?family=Muli:400,300' rel='stylesheet' type='text/css'>
     <link href="assets/css/themify-icons.css" rel="stylesheet">
+    <script>
+    $(document).ready(function(){
+      function fastpivot(a){"use strict";var t={};if("string"!=typeof a&&a.length>0){var l=Object.keys(a[0]),n={};l.forEach(function(a){n[a]={},n[a]._labels=[],n[a]._labelsdata=[],n[a]._data={}}),a.forEach(function(a,t){l.forEach(function(t){var l=a[t];n[t]._data[l]=(n[t]._data[l]||0)+1,n[t]._labels[l]=null})}),l.forEach(function(a){for(var t in n[a]._data)n[a]._labelsdata.push(n[a]._data[t]);n[a]._labels=Object.keys(n[a]._labels)}),t=n}return t}
+
+      var url = "https://peter.demo.socrata.com/resource/rwxv-uhfm.json?$where=department=%27Community%20Development%27&$order=measure";
+      var data = {};
+      $.ajax({
+            url: url,
+            dataType: 'json',
+            async: false,
+            success: function(output) {
+              data = output;
+            }
+          });
+          console.log(data);
+          var same_set = [];
+          var pivoted = []
+        for(var i = 0; i < data.length - 1; i++) {
+          var next = i + 1;
+          if(data[i]["measure"] === data[next]["measure"]) {
+            same_set.push(data[i]);
+          } else {
+            same_set.push(data[i]);
+            var pivoteddata = fastpivot(same_set);
+            var d = pivoteddata["year_quarter"]._labels.map(function(e, i){
+                return [e, pivoteddata["value"]._labels[i]];
+            });
+            pivoted.push({"id":pivoteddata["measureid"]._labels[0],"measure":pivoteddata["measure"]._labels[0],"data":d});
+            same_set = [];
+          }
+        }
+        var table = "";
+        for(i in pivoted) {
+          table += "<tr>";
+          table += "<td>" + pivoted[i]["id"] + "</td>";
+          table += "<td>" + pivoted[i]["measure"] + "</td>";
+          for(j in pivoted[i]["data"]) {
+            if(j < 5) {
+              table += "<td>" + pivoted[i]["data"][j][1] + "</td>"
+            }
+          }
+          table += "</tr>";
+        }
+        document.getElementById("tb").innerHTML = table;
+
+    });
+    </script>
 
 </head>
 <body>
@@ -109,25 +165,8 @@
                                     <th>Q3</th>
                                     <th>Q4</th>
                                   </thead>
-                                  <tbody>
-                                      <tr>
-                                        <td>1</td>
-                                        <td>Percent of Completion</td>
-                                        <td>100</td>
-                                        <td>100</td>
-                                        <td>96</td>
-                                        <td><input type="text" name='department' value="New Value" /></td>
-                                        <td></td>
-                                      </tr>
-                                      <tr>
-                                        <td>2</td>
-                                        <td>Number of Incidents</td>
-                                        <td>5</td>
-                                        <td>3</td>
-                                        <td>2</td>
-                                        <td><input type="text" name='department' value="New Value" /></td>
-                                        <td></td>
-                                      </tr>
+                                  <tbody id="tb">
+
                                   </tbody>
                                 </table>
 
@@ -144,20 +183,8 @@
 </body>
 
     <!--   Core JS Files   -->
-    <script src="assets/js/jquery-1.10.2.js" type="text/javascript"></script>
 	<script src="assets/js/bootstrap.min.js" type="text/javascript"></script>
 
-	<!--  Checkbox, Radio & Switch Plugins -->
-	<script src="assets/js/bootstrap-checkbox-radio.js"></script>
-
-	<!--  Charts Plugin -->
-	<script src="assets/js/chartist.min.js"></script>
-
-    <!--  Notifications Plugin    -->
-    <script src="assets/js/bootstrap-notify.js"></script>
-
-    <!--  Google Maps Plugin    -->
-    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js"></script>
 
     <!-- Paper Dashboard Core javascript and methods for Demo purpose -->
 	<script src="assets/js/paper-dashboard.js"></script>

@@ -1,17 +1,66 @@
 <?php
-$url = 'https://peter.demo.socrata.com/resource/6z67-xud9.json';
+include("settings.php");
+
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_URL, $url);
+curl_setopt($ch, CURLOPT_URL, $departments_db.'?$where=departmentid='."'1'");
 $result = curl_exec($ch);
 $departments = json_decode($result, true);
-$department_selection = "<select id='department' name='departments'>";
-$department_lookup = array();
-foreach($departments as $department) {
-  array_push($department_lookup, array($department["departmentid"]=>$department["department"]));
-  $department_selection.="<option value='department[".$department["departmentid"]."]'>".$department["department"]."</option>";
+$department = $departments[0]["department"];
+
+$username = getenv("username");
+$password = getenv("password");
+
+curl_setopt($ch, CURLOPT_URL, $socrata_users_url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
+curl_setopt($ch, CURLOPT_HTTPHEADER, array("X-Socrata-Host:opendata.socrata.com"));
+$result = curl_exec($ch);
+$users = json_decode($result, true);
+$users_array = $users["results"];
+
+if(isset($_POST["users"])) {
+  $data = array();
+  $u = $_POST["users"];
+  $d = $_POST["departments"];
+  $deleted = $_POST["delete"];
+  $added = $_POST["add"];
+  $del_ids = array();
+  foreach($deleted as $td => $dept) {
+    array_push($del_ids, $td);
+  }
+  $add_ids = array();
+  foreach($added as $ta => $dept_a) {
+    array_push($add_ids, $ta);
+  }
+  foreach($u as $k => $v) {
+    $update = date("c");
+    if(in_array($k, $del_ids) && !in_array($k, $add_ids)) {
+      array_push($data, array("userid"=>$k, "email"=>$v, "departmentid"=>$d[$k], "updated"=>$update,"isdeleted"=>"true"));
+    } else {
+      array_push($data, array("userid"=>$k, "email"=>$v, "departmentid"=>$d[$k], "updated"=>$update,"isdeleted"=>"false"));
+    }
+  }
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_URL, $users_db);
+  curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+  curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+  curl_exec($ch);
+
+
+  $activity_data = array("activity_type"=>"User Update","date"=>$update,"user"=>$username,"message"=>json_encode($data));
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_URL, $activity_db);
+  curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+  curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($activity_data));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+  curl_exec($ch);
+
+  $DeptCanEdit = false;
 }
-$department_selection .= "</select>";
   ?>
 
 
@@ -21,6 +70,9 @@ $department_selection .= "</select>";
   <script
     src="https://code.jquery.com/jquery-3.2.1.min.js"
     integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+    crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+    integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
     crossorigin="anonymous"></script>
     <meta charset="utf-8" />
     <link rel="apple-touch-icon" sizes="76x76" href="assets/img/apple-icon.png">
@@ -49,6 +101,37 @@ $department_selection .= "</select>";
       <link href="http://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet">
       <link href='https://fonts.googleapis.com/css?family=Muli:400,300' rel='stylesheet' type='text/css'>
       <link href="assets/css/themify-icons.css" rel="stylesheet">
+      <script type="text/javascript">
+      $(document).ready(function(){
+        var count = 0;
+        $.ajax({
+              url: "https://peter.demo.socrata.com/resource/mnj2-zafk.json?$select=max(userid)",
+              dataType: 'json',
+              async: false,
+              success: function(data) {
+                count = parseInt(data[0]["max_userid"]);
+              }
+            });
+            var emails = <?php echo json_encode($users_array) ?>;
+            email_list = [];
+            for(i in emails) {
+              email_list.push(emails[i]["email"]);
+            }
+            $( "#email" ).autocomplete({
+                source: email_list
+              });
+          $(".add-row").click(function(){
+            var email = $("#email").val();
+            if($.inArray(email, email_list) === -1) {
+              document.getElementById("errors").innerHTML = "Email address not list of acceptable users please see <a target='_blank' href='<?php echo $base_url ?>/admin/users'>Users Administration</a>";
+            } else {
+                count = count + 1;
+                var markup = "<tr><td><input type='checkbox' name='deleted["+count.toString()+"]' /><td>"+count.toString()+"</td><td><input type='text' name='users["+count.toString()+"]' value='"+email+"' /></td><td><select id='department' name='departments["+count.toString()+"]'><?php echo $department_selection_basic ?></select></td></tr>";
+                $("table tbody").append(markup);
+            }
+          });
+        });
+        </script>
   </head>
   <body>
     <div class="wrapper">
@@ -80,6 +163,10 @@ $department_selection .= "</select>";
                             <p>Approve Data</p>
                         </a>
                     </li>
+                    <?php if($DeptCanEdit){
+                      echo "<li><a href='deptadmin_goals.php'><i class='ti-view-list-alt'></i><p>Approve Data</p></a></li>";
+                      }
+                    ?>
                 </ul>
           </div>
         </div>
@@ -110,9 +197,10 @@ $department_selection .= "</select>";
                     <div class="col-md-12">
                         <div class="card">
                           <div class="content">
-                            <form>
-                                <input type="text" id="department" placeholder="User Email">
+                            <form autocomplete="off">
+                              <input id="email" placeholder="User Email" />
                               <input type="button" class="add-row" value="Add User">
+                              <h3 id="errors"></h3>
                             </form>
                           </div>
                         </div>
@@ -143,8 +231,9 @@ $department_selection .= "</select>";
                                     </thead>
                                     <tbody>
                                       <?php
+
                                       $ch = curl_init();
-                                      $url = 'https://peter.demo.socrata.com/resource/mnj2-zafk.json?$order=departmentid%20asc';
+                                      $url = 'https://peter.demo.socrata.com/resource/mnj2-zafk.json?$order=userid%20asc&$where=departmentid='."'1'"."%20and%20isdeleted="."'false'";
                                       if(!isset($_POST["departments"])) {
                                         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                                         curl_setopt($ch, CURLOPT_URL, $url);
@@ -152,7 +241,7 @@ $department_selection .= "</select>";
                                         $data = json_decode($r, true);
                                         $tbody = "";
                                         for ($i = 0; $i < count($data); $i++) {
-                                          $tbody.="<tr><td><button></button></td><td>".$data[$i]["departmentid"]."</td><td><input name='department[".$data[$i]["departmentid"]."]' type='text' value='".$data[$i]["department"]."' /></td></tr>";
+                                          $tbody.="<tr><td><input type='checkbox' /></td><td>".$data[$i]["userid"]."</td><td><input name='department[".$data[$i]["userid"]."]' type='text' value='".$data[$i]["email"]."' /></td><td>".$department."</td></tr>";
                                         }
                                         echo $tbody;
                                         }
@@ -170,20 +259,7 @@ $department_selection .= "</select>";
                 </div>
   </body>
   <!--   Core JS Files   -->
-  <script src="assets/js/jquery-1.10.2.js" type="text/javascript"></script>
   <script src="assets/js/bootstrap.min.js" type="text/javascript"></script>
-
-  <!--  Checkbox, Radio & Switch Plugins -->
-  <script src="assets/js/bootstrap-checkbox-radio.js"></script>
-
-  <!--  Charts Plugin -->
-  <script src="assets/js/chartist.min.js"></script>
-
-  <!--  Notifications Plugin    -->
-  <script src="assets/js/bootstrap-notify.js"></script>
-
-  <!--  Google Maps Plugin    -->
-  <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js"></script>
 
   <!-- Paper Dashboard Core javascript and methods for Demo purpose -->
   <script src="assets/js/paper-dashboard.js"></script>

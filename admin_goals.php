@@ -1,6 +1,9 @@
 <?php
     $url = 'https://peter.demo.socrata.com/resource/mnj2-zafk.json';
     $ch = curl_init();
+    $username = getenv("username");
+    $password = getenv("password");
+
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_URL, $url);
     $result = curl_exec($ch);
@@ -12,6 +15,7 @@
       $department_selection.="<option value='department[".$department["departmentid"]."]'>".$department["department"]."</option>";
     }
     $department_selection .= "</select>";
+
   ?>
   <html>
   <head>
@@ -47,8 +51,26 @@
       <link href="http://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet">
       <link href='https://fonts.googleapis.com/css?family=Muli:400,300' rel='stylesheet' type='text/css'>
       <link href="assets/css/themify-icons.css" rel="stylesheet">
+      <script src="getgoals.js"></script>
+      <script type="text/javascript">
+      $(document).ready(function(){
+        var data = <?php include("getgoals.php"); ?>;
+        var table = "";
+        for(d in data) {
+          table += "<tr>";
+          table += "<td><a href='"+data[d]["url"]+"' target='_blank'>" + data[d]["id"] + "</a></td>";
+          table += "<td><input type='text' name='goal["+"'"+data[d]["id"]+"'"+"]' value='" + data[d]["name"] + "' /></td>";
+          table += "<td><a href='"+data[d]["dashboard_url"]+"' target='_blank'>" + data[d]["dashboard"] + "</a></td>";
+          table += "<td><input type='checkbox' name='DeptCanEdit' /></td>";
+          table += "<td><a href='admin_grid.php?goal="+data[d]["id"]+"'>Manage and Approve Data</td>";
+          table += "</tr>";
+        }
+        document.getElementById("tb").innerHTML = table;
+      });
+      </script>
   </head>
   <body>
+
     <div class="wrapper">
 
       <div class="sidebar" data-background-color="white" data-active-color="danger">
@@ -78,14 +100,14 @@
                             <p>Departments</p>
                         </a>
                     </li>
-                    <li>
-                        <a href="admin_goals.php">
+                    <li class="active">
+                        <a href="#">
                             <i class="ti-view-list-alt"></i>
                             <p>Goals</p>
                         </a>
                     </li>
-                    <li class="active">
-                        <a href="#">
+                    <li>
+                        <a href="admin_grid.php">
                             <i class="ti-view-list-alt"></i>
                             <p>Manage and Approve</p>
                         </a>
@@ -142,7 +164,7 @@
                     <div class="col-md-12">
                         <div class="card">
                           <div class="content">
-                            <input type="submit" />
+                            <input type="submit" value="Update Goals" />
                           </div>
                         </div>
                       </div>
@@ -153,33 +175,13 @@
                               <div class="content table-responsive table-full-width">
                                   <table class="table table-striped">
                                       <thead>
-                                          <th>Goal ID</th>
+                                        <th>Goal ID</th>
                                         <th>Goal Name</th>
-                                        <th>Target</th>
-                                        <th>Q1</th>
-                                        <th>Q2</th>
-                                        <th>Q3</th>
-                                        <th>Q4</th>
+                                        <th>Goal Dashboard</th>
+                                        <th>Departments Can Edit</th>
+                                        <th></th>
                                       </thead>
-                                      <tbody>
-                                          <tr>
-                                            <td>1</td>
-                                            <td>Percent of Completion</td>
-                                            <td>100</td>
-                                            <td>100</td>
-                                            <td>96</td>
-                                            <td><input type="text" name='department' value="New Value" /></td>
-                                            <td></td>
-                                          </tr>
-                                          <tr>
-                                            <td>2</td>
-                                            <td>Number of Incidents</td>
-                                            <td>5</td>
-                                            <td>3</td>
-                                            <td>2</td>
-                                            <td><input type="text" name='department' value="New Value" /></td>
-                                            <td></td>
-                                          </tr>
+                                      <tbody id="tb">
                                       </tbody>
                                   </table>
 
@@ -196,9 +198,6 @@
   <!--   Core JS Files   -->
   <script src="assets/js/jquery-1.10.2.js" type="text/javascript"></script>
   <script src="assets/js/bootstrap.min.js" type="text/javascript"></script>
-
-  <!--  Google Maps Plugin    -->
-  <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js"></script>
 
   <!-- Paper Dashboard Core javascript and methods for Demo purpose -->
   <script src="assets/js/paper-dashboard.js"></script>

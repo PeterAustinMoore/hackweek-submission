@@ -1,5 +1,5 @@
 <?php
-include("settings.php");
+include("../../settings.php");
 
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -87,22 +87,22 @@ if(isset($_POST["users"])) {
 
 
       <!-- Bootstrap core CSS     -->
-      <link href="assets/css/bootstrap.min.css" rel="stylesheet" />
+      <link href="../../assets/css/bootstrap.min.css" rel="stylesheet" />
 
       <!-- Animation library for notifications   -->
-      <link href="assets/css/animate.min.css" rel="stylesheet"/>
+      <link href="../../assets/css/animate.min.css" rel="stylesheet"/>
 
       <!--  Paper Dashboard core CSS    -->
-      <link href="assets/css/paper-dashboard.css" rel="stylesheet"/>
+      <link href="../../assets/css/paper-dashboard.css" rel="stylesheet"/>
 
       <!--  CSS for Demo Purpose, don't include it in your project     -->
-      <link href="assets/css/demo.css" rel="stylesheet" />
+      <link href="../../assets/css/demo.css" rel="stylesheet" />
 
       <!--  Fonts and icons     -->
       <link href="http://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet">
       <link href='https://fonts.googleapis.com/css?family=Muli:400,300' rel='stylesheet' type='text/css'>
-      <link href="assets/css/themify-icons.css" rel="stylesheet">
-      <script src="getgoals.js"></script>
+      <link href="../../assets/css/themify-icons.css" rel="stylesheet">
+      <script src="../../assets/js/getgoals.js"></script>
       <script type="text/javascript">
       $(document).ready(function(){
         var data = goalGetter.get();
@@ -367,11 +367,11 @@ if(isset($_POST["users"])) {
                 </div>
   </body>
   <!--   Core JS Files   -->
-  <script src="assets/js/bootstrap.min.js" type="text/javascript"></script>
+  <script src="../../assets/js/bootstrap.min.js" type="text/javascript"></script>
 
   <!-- Paper Dashboard Core javascript and methods for Demo purpose -->
-  <script src="assets/js/paper-dashboard.js"></script>
+  <script src="../../assets/js/paper-dashboard.js"></script>
 
   <!-- Paper Dashboard DEMO methods, don't include it in your project! -->
-  <script src="assets/js/demo.js"></script>
+  <script src="../../assets/js/demo.js"></script>
   </html>

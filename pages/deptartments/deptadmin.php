@@ -1,5 +1,5 @@
 <?php
-include("settings.php");
+include("../../settings.php");
 
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);

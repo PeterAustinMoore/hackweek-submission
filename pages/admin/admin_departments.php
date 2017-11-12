@@ -1,4 +1,5 @@
 <?php
+include("../../settings.php");
 $url = 'https://peter.demo.socrata.com/resource/6z67-xud9.json';
 $ch = curl_init();
 
@@ -53,21 +54,21 @@ if(isset($_POST["department"])) {
 
 
     <!-- Bootstrap core CSS     -->
-    <link href="assets/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="../../assets/css/bootstrap.min.css" rel="stylesheet" />
 
     <!-- Animation library for notifications   -->
-    <link href="assets/css/animate.min.css" rel="stylesheet"/>
+    <link href="../../assets/css/animate.min.css" rel="stylesheet"/>
 
     <!--  Paper Dashboard core CSS    -->
-    <link href="assets/css/paper-dashboard.css" rel="stylesheet"/>
+    <link href="../../assets/css/paper-dashboard.css" rel="stylesheet"/>
 
     <!--  CSS for Demo Purpose, don't include it in your project     -->
-    <link href="assets/css/demo.css" rel="stylesheet" />
+    <link href="../../assets/css/demo.css" rel="stylesheet" />
 
     <!--  Fonts and icons     -->
     <link href="http://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet">
     <link href='https://fonts.googleapis.com/css?family=Muli:400,300' rel='stylesheet' type='text/css'>
-    <link href="assets/css/themify-icons.css" rel="stylesheet">
+    <link href="../../assets/css/themify-icons.css" rel="stylesheet">
     <script type="text/javascript">
     $(document).ready(function(){
         $(".add-row").click(function(){
@@ -127,7 +128,7 @@ if(isset($_POST["department"])) {
                         <p>Users</p>
                     </a>
                 </li>
-                  <li>
+                  <li class="active">
                       <a href="#">
                           <i class="ti-view-list-alt"></i>
                           <p>Departments</p>
@@ -151,7 +152,7 @@ if(isset($_POST["department"])) {
                           <p>Narratives</p>
                       </a>
                   </li>
-                  <li class="active">
+                  <li>
                       <a href="activity_log.php">
                           <i class="ti-view-list-alt"></i>
                           <p>Activity Log</p>
@@ -196,37 +197,75 @@ if(isset($_POST["department"])) {
                       </div>
                     </div>
                     <form autocomplete="off" name="departments" method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
+                      <div class="row">
+                          <div class="col-md-12">
+                              <div class="card">
+                                <div class="content">
+                                  <input type="submit" value="Update" />
+                                  <button id="see_removed">View Removed</button>
+                                  <button id="see_current">Return</button>
+                                  <a style="float:right" href="https://peter.demo.socrata.com/dataset/Admin-Emails/6z67-xud9">View Dataset</a>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
                     <div class="row">
                         <div class="col-md-12">
                             <div class="card">
                               <div class="content table-responsive table-full-width">
-                                <table id="activities" class="table table-striped">
+                                <table id="users" class="table table-striped">
                                   <thead>
                                       <tr>
-                                          <th>Activity Type</th>
-                                          <th>Timestamp</th>
+                                          <th>Remove</th>
+                                          <th>Department ID</th>
                                           <th>Department</th>
-                                          <th>Message</th>
                                       </tr>
                                   </thead>
                                   <tbody>
                                     <?php
                                     $ch = curl_init();
-                                    $url = 'https://peter.demo.socrata.com/resource/ymsm-cbme.json?$order=date%20desc';
+                                    $url = 'https://peter.demo.socrata.com/resource/6z67-xud9.json?$order=departmentid%20asc&$where=isdeleted='."'false'";
+                                    if(!isset($_POST["departments"])) {
                                       curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                                       curl_setopt($ch, CURLOPT_URL, $url);
                                       $r = curl_exec($ch);
                                       $data = json_decode($r, true);
                                       $tbody = "";
-                                      $max = count($data);
-                                      for ($i = 0; $i < $max; $i++) {
-                                        $tbody.="<tr><td>".$data[$i]["activity_type"]."</td><td>".$data[$i]["date"]."</td><td>".$data[$i]["user"]."</td><td>".$data[$i]["message"]."</td></tr>";
+                                      for ($i = 0; $i < count($data); $i++) {
+                                        $tbody.="<tr><td><input name='delete[".$data[$i]["departmentid"]."]' type='checkbox' /></td><td id='deptId'>".$data[$i]["departmentid"]."</td><td><input name='department[".$data[$i]["departmentid"]."]' type='text' value='".$data[$i]["department"]."' /></td></tr>";
                                       }
                                       echo $tbody;
+                                      }
                                      ?>
                                   </tbody>
                               </table>
-
+                              <table id="users_removed" class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Add Back</th>
+                                        <th>Department ID</th>
+                                        <th>Department</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                  <?php
+                                  $ch = curl_init();
+                                  $url = 'https://peter.demo.socrata.com/resource/6z67-xud9.json?$order=departmentid%20asc&$where=isdeleted='."'true'";
+                                  if(!isset($_POST["departments"])) {
+                                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                                    curl_setopt($ch, CURLOPT_URL, $url);
+                                    $r = curl_exec($ch);
+                                    $data = json_decode($r, true);
+                                    $tbody = "";
+                                    for ($i = 0; $i < count($data); $i++) {
+                                      $tbody.="<tr><td><input name=delete[".$data[$i]["departmentid"]."] type='hidden' value='deleted' /> <input name='add[".$data[$i]["departmentid"]."]' type='checkbox' /></td><td>".$data[$i]["departmentid"]."</td><td><input name='department[".$data[$i]["departmentid"]."]' type='text' value='".$data[$i]["department"]."' /></td></tr>";
+                                    }
+                                    echo $tbody;
+                                    }
+                                   ?>
+                                </tbody>
+                            </table>
                             </div>
                             </form>
                           </div>
@@ -238,12 +277,11 @@ if(isset($_POST["department"])) {
               </div>
 </body>
 <!--   Core JS Files   -->
-<script src="assets/js/jquery-1.10.2.js" type="text/javascript"></script>
-<script src="assets/js/bootstrap.min.js" type="text/javascript"></script>
+<script src="../../assets/js/bootstrap.min.js" type="text/javascript"></script>
 
 <!-- Paper Dashboard Core javascript and methods for Demo purpose -->
-<script src="assets/js/paper-dashboard.js"></script>
+<script src="../../assets/js/paper-dashboard.js"></script>
 
 <!-- Paper Dashboard DEMO methods, don't include it in your project! -->
-<script src="assets/js/demo.js"></script>
+<script src="../../assets/js/demo.js"></script>
 </html>

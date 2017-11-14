@@ -52,15 +52,25 @@
 
               <ul class="nav">
                 <li>
-                    <a href="deptadmin.php">
+                    <a href="users.php">
                         <i class="ti-user"></i>
                         <p>Users</p>
                     </a>
                 </li>
                   <li class="active">
                       <a href="#">
-                          <i class="ti-view-list-alt"></i>
+                          <i class="ti-check-box"></i>
                           <p>Approve Data</p>
+                      </a>
+                  </li>
+                  <?php if($DeptCanEdit){
+                    echo "<li><a href='deptadmin_goals.php'><i class='ti-view-list-alt'></i><p>Approve Data</p></a></li>";
+                    }
+                  ?>
+                  <li>
+                      <a href="notifications.php">
+                          <i class="ti-email"></i>
+                          <p>Notifications</p>
                       </a>
                   </li>
               </ul>

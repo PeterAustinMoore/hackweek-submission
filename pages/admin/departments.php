@@ -1,6 +1,6 @@
 <?php
-include("../../settings.php");
-$url = 'https://peter.demo.socrata.com/resource/6z67-xud9.json';
+include("../superadmin/settings.php");
+
 $ch = curl_init();
 
 $username = getenv("username");
@@ -28,7 +28,7 @@ if(isset($_POST["department"])) {
     }
   }
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-  curl_setopt($ch, CURLOPT_URL, $url);
+  curl_setopt($ch, CURLOPT_URL, $departments_db);
   curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
   curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
   curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
@@ -72,7 +72,7 @@ if(isset($_POST["department"])) {
     <script type="text/javascript">
     $(document).ready(function(){
         $(".add-row").click(function(){
-          $.getJSON('https://peter.demo.socrata.com/resource/6z67-xud9.json?$select=max(departmentid)', function(data){
+          $.getJSON('<?php echo $departments_db ?>?$select=max(departmentid)', function(data){
             var name = $("#department").val();
             var current_id = parseInt(data[0]["max_departmentid"]) + 1;
             var markup = "<tr><td><input name='delete["+current_id.toString()+"]' type='checkbox' /><td>"+current_id.toString()+"</td><td><input name=department["+current_id.toString()+"] type='text' value='"+name+"' /></td></tr>";
@@ -123,7 +123,7 @@ if(isset($_POST["department"])) {
 
               <ul class="nav">
                 <li>
-                    <a href="admin.php">
+                    <a href="users.php">
                         <i class="ti-user"></i>
                         <p>Users</p>
                     </a>
@@ -135,14 +135,14 @@ if(isset($_POST["department"])) {
                       </a>
                   </li>
                   <li>
-                      <a href="admin_goals.php">
+                      <a href="goals.php">
                           <i class="ti-view-list-alt"></i>
                           <p>Goals</p>
                       </a>
                   </li>
                   <li>
-                      <a href="admin_grid.php">
-                          <i class="ti-view-list-alt"></i>
+                      <a href="data.php">
+                          <i class="ti-check-box"></i>
                           <p>Manage and Approve</p>
                       </a>
                   </li>
@@ -156,6 +156,12 @@ if(isset($_POST["department"])) {
                       <a href="activity_log.php">
                           <i class="ti-view-list-alt"></i>
                           <p>Activity Log</p>
+                      </a>
+                  </li>
+                  <li>
+                      <a href="notifications.php">
+                          <i class="ti-email"></i>
+                          <p>Notifications</p>
                       </a>
                   </li>
               </ul>
@@ -225,7 +231,7 @@ if(isset($_POST["department"])) {
                                   <tbody>
                                     <?php
                                     $ch = curl_init();
-                                    $url = 'https://peter.demo.socrata.com/resource/6z67-xud9.json?$order=departmentid%20asc&$where=isdeleted='."'false'";
+                                    $url = $departments_db.'?$order=departmentid%20asc&$where=isdeleted='."'false'";
                                     if(!isset($_POST["departments"])) {
                                       curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                                       curl_setopt($ch, CURLOPT_URL, $url);
@@ -251,7 +257,7 @@ if(isset($_POST["department"])) {
                                 <tbody>
                                   <?php
                                   $ch = curl_init();
-                                  $url = 'https://peter.demo.socrata.com/resource/6z67-xud9.json?$order=departmentid%20asc&$where=isdeleted='."'true'";
+                                  $url = $departments_db.'?$order=departmentid%20asc&$where=isdeleted='."'true'";
                                   if(!isset($_POST["departments"])) {
                                     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                                     curl_setopt($ch, CURLOPT_URL, $url);

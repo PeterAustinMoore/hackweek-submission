@@ -1,6 +1,6 @@
 <h3>View site as a...</h3>
-<a href="pages/admin/admin.php">Site Admin</a><br>
-<a href="pages/departments/deptadmin.php">Department Admin</a><br>
+<a href="pages/admin/users.php">Site Admin</a><br>
+<a href="pages/departments/users.php">Department Admin</a><br>
 <a href="pages/entry/dataentry.php">Data Enterer</a><br>
 
 

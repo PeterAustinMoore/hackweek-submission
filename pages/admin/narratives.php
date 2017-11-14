@@ -68,31 +68,31 @@
 
                 <ul class="nav">
                   <li>
-                      <a href="admin.php">
+                      <a href="users.php">
                           <i class="ti-user"></i>
                           <p>Users</p>
                       </a>
                   </li>
                     <li>
-                        <a href="admin_departments.php">
+                        <a href="departments.php">
                             <i class="ti-view-list-alt"></i>
                             <p>Departments</p>
                         </a>
                     </li>
                     <li>
-                        <a href="admin_goals.php">
+                        <a href="goals.php">
                             <i class="ti-view-list-alt"></i>
                             <p>Goals</p>
                         </a>
                     </li>
                     <li>
-                        <a href="#">
-                            <i class="ti-view-list-alt"></i>
+                        <a href="data.php">
+                            <i class="ti-check-box"></i>
                             <p>Manage and Approve</p>
                         </a>
                     </li>
                     <li class="active">
-                        <a href="narratives.php">
+                        <a href="#">
                             <i class="ti-view-list-alt"></i>
                             <p>Narratives</p>
                         </a>
@@ -101,6 +101,12 @@
                         <a href="activity_log.php">
                             <i class="ti-view-list-alt"></i>
                             <p>Activity Log</p>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="notifications.php">
+                            <i class="ti-email"></i>
+                            <p>Notifications</p>
                         </a>
                     </li>
                 </ul>

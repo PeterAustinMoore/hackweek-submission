@@ -1,16 +1,12 @@
 <?php
-include("../../settings.php");
+include("../superadmin/settings.php");
 
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_URL, $departments_db);
+curl_setopt($ch, CURLOPT_URL, $departments_db.'?$where=departmentid='."'1'");
 $result = curl_exec($ch);
 $departments = json_decode($result, true);
-
-$department_selection_basic = "";
-foreach($departments as $department) {
-  $department_selection_basic .= "<option value='".$department["departmentid"]."'>".$department["department"]."</option>";
-}
+$department = $departments[0]["department"];
 
 $username = getenv("username");
 $password = getenv("password");
@@ -62,8 +58,12 @@ if(isset($_POST["users"])) {
   curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($activity_data));
   curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
   curl_exec($ch);
+
+  $DeptCanEdit = false;
 }
   ?>
+
+
   <html>
   <head>
   <!-- JQUERY BABY -->
@@ -74,7 +74,6 @@ if(isset($_POST["users"])) {
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
     integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
     crossorigin="anonymous"></script>
-
     <meta charset="utf-8" />
     <link rel="apple-touch-icon" sizes="76x76" href="assets/img/apple-icon.png">
     <link rel="icon" type="image/png" sizes="96x96" href="assets/img/favicon.png">
@@ -102,10 +101,8 @@ if(isset($_POST["users"])) {
       <link href="http://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet">
       <link href='https://fonts.googleapis.com/css?family=Muli:400,300' rel='stylesheet' type='text/css'>
       <link href="../../assets/css/themify-icons.css" rel="stylesheet">
-      <script src="../../assets/js/getgoals.js"></script>
       <script type="text/javascript">
       $(document).ready(function(){
-        var data = goalGetter.get();
         var count = 0;
         $.ajax({
               url: "https://peter.demo.socrata.com/resource/mnj2-zafk.json?$select=max(userid)",
@@ -133,43 +130,8 @@ if(isset($_POST["users"])) {
                 $("table tbody").append(markup);
             }
           });
-          $("#see_removed").click(function(e){
-            e.preventDefault();
-            $("#users").toggle();
-            $("#users_removed").toggle();
-            $("#see_removed").toggle();
-            $("#see_current").toggle();
-          });
-          $("#see_current").click(function(e){
-            e.preventDefault();
-            $("#users").toggle();
-            $("#users_removed").toggle();
-            $("#see_current").toggle();
-            $("#see_removed").toggle();
-          });
         });
         </script>
-        <style>
-        #users_removed {
-          display:none;
-        }
-        #see_current {
-          display:none;
-        }
-        .ui-menu {
-          background: white;
-          border: 1px solid black;
-        }
-        .ui-menu-item {
-          list-style-type: none;
-          margin:5px;
-          width:100%;
-        }
-        .ui-menu-item:hover {
-          cursor: pointer;
-        }
-        </style>
-
   </head>
   <body>
     <div class="wrapper">
@@ -187,41 +149,28 @@ if(isset($_POST["users"])) {
                         Home
                     </a>
                 </div>
+
                 <ul class="nav">
                   <li class="active">
-                      <a href="admin.php">
+                      <a href="#">
                           <i class="ti-user"></i>
                           <p>Users</p>
                       </a>
                   </li>
                     <li>
-                        <a href="admin_departments.php">
-                            <i class="ti-view-list-alt"></i>
-                            <p>Departments</p>
+                        <a href="data.php">
+                            <i class="ti-check-box"></i>
+                            <p>Approve Data</p>
                         </a>
                     </li>
+                    <?php if($DeptCanEdit){
+                      echo "<li><a href='goals.php'><i class='ti-view-list-alt'></i><p>Approve Data</p></a></li>";
+                      }
+                    ?>
                     <li>
-                        <a href="admin_goals.php">
-                            <i class="ti-view-list-alt"></i>
-                            <p>Goals</p>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="admin_grid.php">
-                            <i class="ti-view-list-alt"></i>
-                            <p>Manage and Approve</p>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="narratives.php">
-                            <i class="ti-view-list-alt"></i>
-                            <p>Narratives</p>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="activity_log.php">
-                            <i class="ti-view-list-alt"></i>
-                            <p>Activity Log</p>
+                        <a href="notifications.php">
+                            <i class="ti-email"></i>
+                            <p>Notifications</p>
                         </a>
                     </li>
                 </ul>
@@ -246,6 +195,8 @@ if(isset($_POST["users"])) {
                   </div>
               </div>
           </nav>
+
+
           <div class="content">
               <div class="container-fluid">
                 <div class="row">
@@ -253,32 +204,27 @@ if(isset($_POST["users"])) {
                         <div class="card">
                           <div class="content">
                             <form autocomplete="off">
-                              <div class="ui-widget">
-                                <input id="email">
-                                <input type="button" class="add-row" value="Add Users">
-                                <h3 id="errors"><h3>
-                              </div>
+                              <input id="email" placeholder="User Email" />
+                              <input type="button" class="add-row" value="Add User">
+                              <h3 id="errors"></h3>
                             </form>
                           </div>
                         </div>
                       </div>
                     </div>
-                    <form name="users" method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="card">
-                              <div class="content">
-                                <input type="submit" />
-                                <button id="see_removed">View Removed</button>
-                                <button id="see_current">Return</button>
-                                <a target="_blank" style="float:right" href="https://peter.demo.socrata.com/dataset/Admin-Emails/mnj2-zafk">View Dataset</a>
+                        <form name="departments" method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
+                          <div class="row">
+                              <div class="col-md-12">
+                                  <div class="card">
+                                    <div class="content">
+                                      <input type="submit" />
+                                    </div>
+                                  </div>
+                                </div>
                               </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="card">
+                              <div class="row">
+                                  <div class="col-md-12">
+                                      <div class="card">
                               <div class="content table-responsive table-full-width">
                                   <table id="users" class="table table-striped">
                                     <thead>
@@ -291,71 +237,23 @@ if(isset($_POST["users"])) {
                                     </thead>
                                     <tbody>
                                       <?php
+
                                       $ch = curl_init();
-                                      $url = 'https://peter.demo.socrata.com/resource/mnj2-zafk.json?$order=userid%20asc&$where=isdeleted='."'false'";
+                                      $url = 'https://peter.demo.socrata.com/resource/mnj2-zafk.json?$order=userid%20asc&$where=departmentid='."'1'"."%20and%20isdeleted="."'false'";
+                                      if(!isset($_POST["departments"])) {
                                         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                                         curl_setopt($ch, CURLOPT_URL, $url);
                                         $r = curl_exec($ch);
                                         $data = json_decode($r, true);
                                         $tbody = "";
-                                        $max = count($data);
-                                        $department_lookup = array();
-                                        for ($i = 0; $i < $max; $i++) {
-                                          $department_selection = "";
-                                          foreach($departments as $department) {
-                                            array_push($department_lookup, array($department["departmentid"]=>$department["department"]));
-                                            if($department["departmentid"] == $data[$i]["departmentid"]) {
-                                              $department_selection.="<option selected value='".$department["departmentid"]."'>".$department["department"]."</option>";
-                                            } else {
-                                              $department_selection.="<option value='".$department["departmentid"]."'>".$department["department"]."</option>";
-                                            }
-                                          }
-                                          $dept = "<select id='department' name='departments[".$data[$i]["userid"]."]'>";
-                                          $tbody.="<tr><td><input name='delete[".$data[$i]["userid"]."]' type='checkbox' /></td><td>".$data[$i]["userid"]."</td><td><input name='users[".$data[$i]["userid"]."]' type='text' value='".$data[$i]["email"]."' /></td><td>".$dept.$department_selection."</select></td></tr>";
+                                        for ($i = 0; $i < count($data); $i++) {
+                                          $tbody.="<tr><td><input type='checkbox' /></td><td>".$data[$i]["userid"]."</td><td><input name='department[".$data[$i]["userid"]."]' type='text' value='".$data[$i]["email"]."' /></td><td>".$department."</td></tr>";
                                         }
                                         echo $tbody;
+                                        }
                                        ?>
                                     </tbody>
                                 </table>
-                                <table id="users_removed" class="table table-striped">
-                                  <thead>
-                                    <tr>
-                                        <th>Add Back</th>
-                                        <th>User ID</th>
-                                        <th>User</th>
-                                        <th>Department</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    <?php
-                                    $ch = curl_init();
-                                    $url = 'https://peter.demo.socrata.com/resource/mnj2-zafk.json?$order=userid%20asc&$where=isdeleted='."'true'";
-
-                                      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                                      curl_setopt($ch, CURLOPT_URL, $url);
-                                      $r = curl_exec($ch);
-                                      $data = json_decode($r, true);
-                                      $tbody = "";
-                                      $department_lookup = array();
-                                      $max = count($data);
-                                      for ($i = 0; $i < $max; $i++) {
-                                        $department_selection = "";
-                                        foreach($departments as $department) {
-                                          array_push($department_lookup, array($department["departmentid"]=>$department["department"]));
-                                          if($department["departmentid"] == $data[$i]["departmentid"]) {
-                                            $department_selection.="<option selected value='".$department["departmentid"]."'>".$department["department"]."</option>";
-                                          } else {
-                                            $department_selection.="<option value='".$department["departmentid"]."'>".$department["department"]."</option>";
-                                          }
-                                        }
-                                        $dept = "<select id='department' name='departments[".$data[$i]["userid"]."]'>";
-                                        $tbody.="<tr><td><input name='delete[".$data[$i]["userid"]."]' type='hidden' /><input name='add[".$data[$i]["userid"]."]' type='checkbox' /></td><td>".$data[$i]["userid"]."</td><td><input name='users[".$data[$i]["userid"]."]' type='text' value='".$data[$i]["email"]."' /></td><td>".$dept.$department_selection."</select></td></tr>";
-                                      }
-                                      echo $tbody;
-
-                                     ?>
-                                  </tbody>
-                              </table>
                               </div>
                               </form>
                             </div>

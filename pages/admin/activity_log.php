@@ -1,40 +1,6 @@
 <?php
-include("../../settings.php");
-$url = 'https://peter.demo.socrata.com/resource/6z67-xud9.json';
-$ch = curl_init();
-
-$username = getenv("username");
-$password = getenv("password");
-
-if(isset($_POST["department"])) {
-  $data = array();
-  $d = $_POST["department"];
-  $deleted = $_POST["delete"];
-  $added = $_POST["add"];
-  $del_ids = array();
-  foreach($deleted as $td => $dept) {
-    array_push($del_ids, $td);
-  }
-  $add_ids = array();
-  foreach($added as $ta => $dept_a) {
-    array_push($add_ids, $ta);
-  }
-  foreach($d as $k => $v) {
-    $update = date("c");
-    if(in_array($k, $del_ids) && !in_array($k, $add_ids)) {
-      array_push($data, array("departmentid"=>$k, "department"=>$v, "updated"=>$update,"isdeleted"=>"true"));
-    } else {
-      array_push($data, array("departmentid"=>$k, "department"=>$v, "updated"=>$update,"isdeleted"=>"false"));
-    }
-  }
-  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-  curl_setopt($ch, CURLOPT_URL, $url);
-  curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-  curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
-  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-  curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-  curl_exec($ch);
- } ?>
+include("../superadmin/settings.php");
+?>
 <html>
 <head>
 <!-- JQUERY BABY -->
@@ -69,40 +35,6 @@ if(isset($_POST["department"])) {
     <link href="http://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet">
     <link href='https://fonts.googleapis.com/css?family=Muli:400,300' rel='stylesheet' type='text/css'>
     <link href="../../assets/css/themify-icons.css" rel="stylesheet">
-    <script type="text/javascript">
-    $(document).ready(function(){
-        $(".add-row").click(function(){
-          $.getJSON('https://peter.demo.socrata.com/resource/6z67-xud9.json?$select=max(departmentid)', function(data){
-            var name = $("#department").val();
-            var current_id = parseInt(data[0]["max_departmentid"]) + 1;
-            var markup = "<tr><td><input name='delete["+current_id.toString()+"]' type='checkbox' /><td>"+current_id.toString()+"</td><td><input name=department["+current_id.toString()+"] type='text' value='"+name+"' /></td></tr>";
-            $("table tbody").append(markup);
-          });
-        });
-        $("#see_removed").click(function(e){
-          e.preventDefault();
-          $("#users").toggle();
-          $("#users_removed").toggle();
-          $("#see_removed").toggle();
-          $("#see_current").toggle();
-        });
-        $("#see_current").click(function(e){
-          e.preventDefault();
-          $("#users").toggle();
-          $("#users_removed").toggle();
-          $("#see_current").toggle();
-          $("#see_removed").toggle();
-        });
-      });
-      </script>
-      <style>
-      #users_removed {
-        display:none;
-      }
-      #see_current {
-        display:none;
-      }
-      </style>
 </head>
 <body>
   <div class="wrapper">
@@ -142,7 +74,7 @@ if(isset($_POST["department"])) {
                   </li>
                   <li>
                       <a href="admin_grid.php">
-                          <i class="ti-view-list-alt"></i>
+                          <i class="ti-check-box"></i>
                           <p>Manage and Approve</p>
                       </a>
                   </li>
@@ -158,12 +90,18 @@ if(isset($_POST["department"])) {
                           <p>Activity Log</p>
                       </a>
                   </li>
+                  <li>
+                      <a href="notifications.php">
+                          <i class="ti-email"></i>
+                          <p>Notifications</p>
+                      </a>
+                  </li>
               </ul>
         </div>
       </div>
 
     <div class="main-panel">
-    <nav class="navbar navbar-default">
+      <nav class="navbar navbar-default">
             <div class="container-fluid">
                 <div class="navbar-header">
                     <button type="button" class="navbar-toggle">
@@ -184,19 +122,6 @@ if(isset($_POST["department"])) {
 
         <div class="content">
             <div class="container-fluid">
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="card">
-                          <div class="content">
-                            <form>
-                                <input type="text" id="department" placeholder="Department">
-                                <input type="button" class="add-row" value="Add Department">
-                            </form>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <form autocomplete="off" name="departments" method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
                     <div class="row">
                         <div class="col-md-12">
                             <div class="card">
@@ -206,14 +131,14 @@ if(isset($_POST["department"])) {
                                       <tr>
                                           <th>Activity Type</th>
                                           <th>Timestamp</th>
-                                          <th>Department</th>
+                                          <th>User</th>
                                           <th>Message</th>
                                       </tr>
                                   </thead>
                                   <tbody>
                                     <?php
                                     $ch = curl_init();
-                                    $url = 'https://peter.demo.socrata.com/resource/ymsm-cbme.json?$order=date%20desc';
+                                    $url = $activity_db.'?$order=date%20desc';
                                       curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                                       curl_setopt($ch, CURLOPT_URL, $url);
                                       $r = curl_exec($ch);
@@ -229,7 +154,6 @@ if(isset($_POST["department"])) {
                               </table>
 
                             </div>
-                            </form>
                           </div>
                         </div>
                       </div>

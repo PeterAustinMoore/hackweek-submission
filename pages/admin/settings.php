@@ -89,7 +89,7 @@
 
               <ul class="nav">
                 <li class="active">
-                    <a href="settings.php">
+                    <a href="#">
                         <i class="ti-settings"></i>
                         <p>Settings</p>
                     </a>
@@ -113,7 +113,7 @@
                       </a>
                   </li>
                   <li>
-                      <a href="#">
+                      <a href="data.php">
                           <i class="ti-check-box"></i>
                           <p>Manage and Approve</p>
                       </a>

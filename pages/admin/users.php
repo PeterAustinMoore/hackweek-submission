@@ -1,5 +1,4 @@
 <?php
-error_reporting(E_ALL); ini_set('display_errors', 1);
 include("../superadmin/settings.php");
 
 $ch = curl_init();
@@ -28,6 +27,7 @@ if(isset($_POST["users"])) {
   $data = array();
   $u = $_POST["users"];
   $d = $_POST["departments"];
+  $admin = $_POST["isAdmin"];
   $deleted = $_POST["delete"];
   $added = $_POST["add"];
   $del_ids = array();
@@ -43,7 +43,11 @@ if(isset($_POST["users"])) {
     if(in_array($k, $del_ids) && !in_array($k, $add_ids)) {
       array_push($data, array("userid"=>$k, "email"=>$v, "departmentid"=>$d[$k], "updated"=>$update,"isdeleted"=>"true"));
     } else {
-      array_push($data, array("userid"=>$k, "email"=>$v, "departmentid"=>$d[$k], "updated"=>$update,"isdeleted"=>"false"));
+      if($admin[$k]) {
+        array_push($data, array("userid"=>$k, "email"=>$v, "departmentid"=>$d[$k], "updated"=>$update,"isdeleted"=>"false","isdeptadmin"=>"true"));
+      } else {
+        array_push($data, array("userid"=>$k, "email"=>$v, "departmentid"=>$d[$k], "updated"=>$update,"isdeleted"=>"false", "isdeptadmin" => "false"));
+      }
     }
   }
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -301,6 +305,7 @@ if(isset($_POST["users"])) {
                                             <th>User ID</th>
                                             <th>User</th>
                                             <th>Department</th>
+                                            <th>Is Department Admin?</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -325,7 +330,11 @@ if(isset($_POST["users"])) {
                                             }
                                           }
                                           $dept = "<select id='department' name='departments[".$data[$i]["userid"]."]'>";
-                                          $tbody.="<tr><td><input name='delete[".$data[$i]["userid"]."]' type='checkbox' /></td><td>".$data[$i]["userid"]."</td><td><input name='users[".$data[$i]["userid"]."]' type='text' value='".$data[$i]["email"]."' /></td><td>".$dept.$department_selection."</select></td></tr>";
+                                          if($data[$i]["isdeptadmin"] == "true") {
+                                            $tbody.="<tr><td><input name='delete[".$data[$i]["userid"]."]' type='checkbox' /></td><td>".$data[$i]["userid"]."</td><td><input name='users[".$data[$i]["userid"]."]' type='text' value='".$data[$i]["email"]."' /></td><td>".$dept.$department_selection."</select></td><td><input type='checkbox' name='isAdmin[".$data[$i]["userid"]."]' checked /></td></tr>";
+                                          } else {
+                                            $tbody.="<tr><td><input name='delete[".$data[$i]["userid"]."]' type='checkbox' /></td><td>".$data[$i]["userid"]."</td><td><input name='users[".$data[$i]["userid"]."]' type='text' value='".$data[$i]["email"]."' /></td><td>".$dept.$department_selection."</select></td><td><input type='checkbox' name='isAdmin[".$data[$i]["userid"]."]' /></td></tr>";
+                                          }
                                         }
                                         echo $tbody;
                                        ?>

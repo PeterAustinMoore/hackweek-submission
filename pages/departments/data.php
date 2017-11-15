@@ -8,6 +8,19 @@
     curl_setopt($ch, CURLOPT_URL, $goal_db);
     $result = curl_exec($ch);
     $goals=json_decode($result, true);
+
+    $ch = curl_init();
+    $url = $goal_db.'?$where=deptcanedit='."'true'";
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
+    $result = curl_exec($ch);
+    $data = json_decode($result, true);
+    if(count($data) > 0) {
+      $DeptCanEdit = true;
+    } else {
+      $DeptCanEdit = false;
+    }
 ?>
 <html>
 <head>
@@ -97,7 +110,7 @@
                       </a>
                   </li>
                   <?php if($DeptCanEdit){
-                    echo "<li><a href='deptadmin_goals.php'><i class='ti-view-list-alt'></i><p>Approve Data</p></a></li>";
+                    echo "<li><a href='deptadmin_goals.php'><i class='ti-view-list-alt'></i><p>Goals</p></a></li>";
                     }
                   ?>
                   <li>

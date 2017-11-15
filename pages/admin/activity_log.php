@@ -73,13 +73,13 @@ include("../superadmin/settings.php");
                       </a>
                   </li>
                   <li>
-                      <a href="admin_goals.php">
+                      <a href="=goals.php">
                           <i class="ti-view-list-alt"></i>
                           <p>Goals</p>
                       </a>
                   </li>
                   <li>
-                      <a href="admin_grid.php">
+                      <a href="data.php">
                           <i class="ti-check-box"></i>
                           <p>Manage and Approve</p>
                       </a>

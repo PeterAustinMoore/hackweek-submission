@@ -205,7 +205,7 @@
                     <div class="col-md-12">
                         <div class="card">
                           <div class="content">
-                            <input name="allowDeptChange" type="checkbox" /> Allow Departments to Alter Goal Name and Target
+                            <input name="allowDeptChange" type="checkbox" /> Allow Departments to Alter All Goal Names and Targets
                           </div>
                         </div>
                       </div>

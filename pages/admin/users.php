@@ -261,6 +261,7 @@ if(isset($_POST["users"])) {
                           <div class="content">
                             <form autocomplete="off">
                               <div class="ui-widget">
+                                <h4>Users must be added to Socrata and have Socrata accounts prior to being added here</h4>
                                 <input id="email">
                                 <input type="button" class="add-row" value="Add Users">
                                 <h3 id="errors"><h3>

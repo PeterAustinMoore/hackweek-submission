@@ -57,10 +57,10 @@
           table += "<td>" + data[d]["goal_title"] + "</td>";
         }
         table += "<td>"+ data[d]["target"]+"</td>";
-        table += "<td></td>";
-        table += "<td></td>";
-        table += "<td></td>";
-        table += "<td></td>";
+        table += "<td><input type='text' /></td>";
+        table += "<td><input type='text' /></td>";
+        table += "<td><input type='text' /></td>";
+        table += "<td><input type='text' /></td>";
         table += "</tr>";
       }
       document.getElementById("tb").innerHTML = table;

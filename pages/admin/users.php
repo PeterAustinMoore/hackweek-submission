@@ -109,7 +109,7 @@ if(isset($_POST["users"])) {
         var data = goalGetter.get();
         var count = 0;
         $.ajax({
-              url: "https://peter.demo.socrata.com/resource/mnj2-zafk.json?$select=max(userid)",
+              url: "<?php echo $users_db; ?>?$select=max(userid)",
               dataType: 'json',
               async: false,
               success: function(data) {
@@ -189,6 +189,12 @@ if(isset($_POST["users"])) {
                     </a>
                 </div>
                 <ul class="nav">
+                  <li>
+                      <a href="settings.php">
+                          <i class="ti-settings"></i>
+                          <p>Settings</p>
+                      </a>
+                  </li>
                   <li class="active">
                       <a href="#">
                           <i class="ti-user"></i>
@@ -300,7 +306,7 @@ if(isset($_POST["users"])) {
                                     <tbody>
                                       <?php
                                       $ch = curl_init();
-                                      $url = 'https://peter.demo.socrata.com/resource/mnj2-zafk.json?$order=userid%20asc&$where=isdeleted='."'false'";
+                                      $url = $users_db.'?$order=userid%20asc&$where=isdeleted='."'false'";
                                         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                                         curl_setopt($ch, CURLOPT_URL, $url);
                                         $r = curl_exec($ch);
@@ -337,7 +343,7 @@ if(isset($_POST["users"])) {
                                   <tbody>
                                     <?php
                                     $ch = curl_init();
-                                    $url = 'https://peter.demo.socrata.com/resource/mnj2-zafk.json?$order=userid%20asc&$where=isdeleted='."'true'";
+                                    $url = $users_db.'?$order=userid%20asc&$where=isdeleted='."'true'";
 
                                       curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                                       curl_setopt($ch, CURLOPT_URL, $url);

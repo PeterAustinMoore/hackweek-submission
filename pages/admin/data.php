@@ -9,6 +9,13 @@
     curl_setopt($ch, CURLOPT_URL, $goal_db);
     $result = curl_exec($ch);
     $goals=json_decode($result, true);
+
+
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
+    curl_setopt($ch, CURLOPT_URL, $production_data_db);
+    $result = curl_exec($ch);
+    $prod_data=json_decode($result, true);
   ?>
   <html>
   <head>
@@ -45,20 +52,38 @@
       <link href="../../assets/css/themify-icons.css" rel="stylesheet">
       <script>
       $(document).ready(function(){
-        var data = <?php echo json_encode($goals); ?>;
-
-        var table = "";
-        for(d in data) {
-          table += "<tr>";
-          table += "<td>" + data[d]["id"] + "</td>";
-          table += "<td><input type='text' name='goal["+data[d]["id"]+"]' value='" + data[d]["goal_title"] + "' /></td>";
-          table += "<td>"+ data[d]["target"]+"</td>";
-          table += "<td><input type='text' /></td>";
-          table += "<td><input type='text' /></td>";
-          table += "<td><input type='text' /></td>";
-          table += "<td><input type='text' /></td>";
-          table += "</tr>";
+        var goals = <?php echo json_encode($goals); ?>;
+        var goal_lookup = {};
+        for(g in goals) {
+          goal_lookup[goals[g]['id']] = {"title":goals[g]["goal_title"], "target":goals[g]["target"]};
         }
+
+        var prod_data = <?php echo json_encode($prod_data); ?>;
+        var data_for_table = {};
+        for(p in prod_data) {
+          var quarter = "quarter"+prod_data[p]["period"];
+          var fy = prod_data[p]["fiscal_year"];
+          var id = prod_data[p]["id"]
+          data_for_table[prod_data[p]["goal_id"]] = Object.assign({[fy]:{}}, data_for_table[prod_data[p]["goal_id"]]);
+          data_for_table[prod_data[p]["goal_id"]][fy] = Object.assign({"title":goal_lookup[prod_data[p]["goal_id"]]["title"], "target":goal_lookup[prod_data[p]["goal_id"]]["target"], "id":id,  [quarter]: prod_data[p]["value"]},data_for_table[prod_data[p]["goal_id"]][fy]);
+        }
+        var table = "";
+        for(key in data_for_table) {
+          for(year in data_for_table[key]) {
+            if(year == 2017) {
+              table += "<tr>";
+              table += "<td>" + key + "</td>";
+              table += "<td><input type='text' name='goal["+key+"]' autocomplete='off' value='" + data_for_table[key][year]["title"] + "' /></td>";
+              table += "<td>"+ data_for_table[key][year]["target"]+"</td>";
+              table += "<td><input name='1' type='text' value="+ data_for_table[key][year]["quarter1"]+" /></td>";
+              table += "<td><input name='2' type='text' value="+ data_for_table[key][year]["quarter2"]+" /></td>";
+              table += "<td><input name='3' type='text' value="+ data_for_table[key][year]["quarter3"]+" /></td>";
+              table += "<td><input name='4' type='text' value="+ data_for_table[key][year]["quarter4"]+" /></td>";
+              table += "</tr>";
+            }
+          }
+        }
+        console.log(table);
         document.getElementById("tb").innerHTML = table;
       });
       </script>
@@ -136,7 +161,7 @@
                           <span class="icon-bar bar2"></span>
                           <span class="icon-bar bar3"></span>
                       </button>
-                      <a class="navbar-brand" href="#">Data</a>
+                      <a class="navbar-brand" href="#">Manage and Approve</a>
                   </div>
                   <div class="collapse navbar-collapse">
                       <ul class="nav navbar-nav navbar-right">

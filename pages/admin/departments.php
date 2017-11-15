@@ -123,6 +123,12 @@ if(isset($_POST["department"])) {
 
               <ul class="nav">
                 <li>
+                    <a href="settings.php">
+                        <i class="ti-settings"></i>
+                        <p>Settings</p>
+                    </a>
+                </li>
+                <li>
                     <a href="users.php">
                         <i class="ti-user"></i>
                         <p>Users</p>

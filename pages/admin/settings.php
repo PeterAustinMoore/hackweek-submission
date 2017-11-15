@@ -1,5 +1,24 @@
-<?php
-include("../superadmin/settings.php");
+<?php include("../superadmin/settings.php");
+    $username = getenv("username");
+    $password = getenv("password");
+
+    $ch = curl_init();
+    if(isset($_POST["save"])) {
+      $data = array("quarter1" => $_POST["quarter1"], "quarter2" => $_POST["quarter2"], "quarter3" => $_POST["quarter3"], "quarter4" => $_POST["quarter4"]);
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+      curl_setopt($ch, CURLOPT_URL, $settings_db);
+      curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+      curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
+      curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+      curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+      curl_exec($ch);
+    }
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_URL, $settings_db);
+    curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
+    $result = curl_exec($ch);
+    $setting_data = json_decode($result, true);
 ?>
 <html>
 <head>
@@ -35,10 +54,25 @@ include("../superadmin/settings.php");
     <link href="http://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet">
     <link href='https://fonts.googleapis.com/css?family=Muli:400,300' rel='stylesheet' type='text/css'>
     <link href="../../assets/css/themify-icons.css" rel="stylesheet">
+    <script>
+    var settings_data = <?php echo json_encode($setting_data); ?>;
+    $(document).ready(function(){
+      var table = "";
+      var data = settings_data[0];
+      table += '<tr>';
+      table += '<td><input name="quarter1" type="text" value ="' + data["quarter1"] + '"/></td>';
+      table += '<td><input name="quarter2" type="text" value ="' + data["quarter2"] + '"/></td>'
+      table += '<td><input name="quarter3" type="text" value ="' + data["quarter3"] + '"/></td>'
+      table += '<td><input name="quarter4" type="text" value ="' + data["quarter4"] + '"/></td>'
+      table += '</tr>'
+
+      document.getElementById("tb").innerHTML = table;
+
+    });
+    </script>
 </head>
 <body>
   <div class="wrapper">
-
     <div class="sidebar" data-background-color="white" data-active-color="danger">
 
       <!--
@@ -54,32 +88,32 @@ include("../superadmin/settings.php");
               </div>
 
               <ul class="nav">
-                <li>
+                <li class="active">
                     <a href="settings.php">
                         <i class="ti-settings"></i>
                         <p>Settings</p>
                     </a>
                 </li>
                 <li>
-                    <a href="admin.php">
+                    <a href="users.php">
                         <i class="ti-user"></i>
                         <p>Users</p>
                     </a>
                 </li>
                   <li>
-                      <a href="#">
+                      <a href="departments.php">
                           <i class="ti-view-list-alt"></i>
                           <p>Departments</p>
                       </a>
                   </li>
                   <li>
-                      <a href="admin_goals.php">
+                      <a href="goals.php">
                           <i class="ti-view-list-alt"></i>
                           <p>Goals</p>
                       </a>
                   </li>
                   <li>
-                      <a href="admin_grid.php">
+                      <a href="#">
                           <i class="ti-check-box"></i>
                           <p>Manage and Approve</p>
                       </a>
@@ -90,7 +124,7 @@ include("../superadmin/settings.php");
                           <p>Narratives</p>
                       </a>
                   </li>
-                  <li class="active">
+                  <li>
                       <a href="activity_log.php">
                           <i class="ti-view-list-alt"></i>
                           <p>Activity Log</p>
@@ -107,7 +141,7 @@ include("../superadmin/settings.php");
       </div>
 
     <div class="main-panel">
-      <nav class="navbar navbar-default">
+    <nav class="navbar navbar-default">
             <div class="container-fluid">
                 <div class="navbar-header">
                     <button type="button" class="navbar-toggle">
@@ -116,7 +150,7 @@ include("../superadmin/settings.php");
                         <span class="icon-bar bar2"></span>
                         <span class="icon-bar bar3"></span>
                     </button>
-                    <a class="navbar-brand" href="#">Departments</a>
+                    <a class="navbar-brand" href="#">Settings</a>
                 </div>
                 <div class="collapse navbar-collapse">
                     <ul class="nav navbar-nav navbar-right">
@@ -126,45 +160,46 @@ include("../superadmin/settings.php");
         </nav>
 
 
-        <div class="content">
-            <div class="container-fluid">
+
+            <div class="content">
+                <div class="container-fluid">
+                  <form name="departments" method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
                     <div class="row">
                         <div class="col-md-12">
                             <div class="card">
-                              <div class="content table-responsive table-full-width">
-                                <table id="activities" class="table table-striped">
-                                  <thead>
-                                      <tr>
-                                          <th>Activity Type</th>
-                                          <th>Timestamp</th>
-                                          <th>User</th>
-                                          <th>Message</th>
-                                      </tr>
-                                  </thead>
-                                  <tbody>
-                                    <?php
-                                    $ch = curl_init();
-                                    $url = $activity_db.'?$order=date%20desc';
-                                      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                                      curl_setopt($ch, CURLOPT_URL, $url);
-                                      $r = curl_exec($ch);
-                                      $data = json_decode($r, true);
-                                      $tbody = "";
-                                      $max = count($data);
-                                      for ($i = 0; $i < $max; $i++) {
-                                        $tbody.="<tr><td>".$data[$i]["activity_type"]."</td><td>".$data[$i]["date"]."</td><td>".$data[$i]["user"]."</td><td>".$data[$i]["message"]."</td></tr>";
-                                      }
-                                      echo $tbody;
-                                     ?>
-                                  </tbody>
-                              </table>
-
+                              <div class="content">
+                                <input type="submit" name="save" value="Save Settings" />
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="header">
+                                    <h4 class="title">Quarter Dates (MM/DD)</h4>
+                                </div>
+                                <div class="content table-responsive table-full-width">
+                                    <table class="table table-striped">
+                                      <thead>
+                                        <tr>
+                                          <th>Quarter 1</th>
+                                          <th>Quarter 2</th>
+                                          <th>Quarter 3</th>
+                                          <th>Quarter 4</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody id="tb">
+                                      </tbody>
+                                    </table>
+                                  </form>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                  </div>
+                </div>
+            </div>
+        </div>
                 </div>
               </div>
 </body>

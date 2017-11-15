@@ -1,21 +1,57 @@
 <?php
     include("../superadmin/settings.php");
-    $ch = curl_init();
     $username = getenv("username");
     $password = getenv("password");
 
+    $ch = curl_init();
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_URL, $departments_db);
     $result = curl_exec($ch);
-    $departments = json_decode($result, true);
-    $department_selection = "<select id='department' name='departments'>";
-    $department_lookup = array();
-    foreach($departments as $department) {
-      array_push($department_lookup, array($department["departmentid"]=>$department["department"]));
-      $department_selection.="<option value='department[".$department["departmentid"]."]'>".$department["department"]."</option>";
-    }
-    $department_selection .= "</select>";
+    $departments_raw = json_decode($result, true);
 
+    $departments = json_encode($departments_raw);
+
+    if(isset($_POST["goal"])) {
+      $data = array();
+      $g = $_POST["goal"];
+      $editable = $_POST["DeptCanEdit"];
+      $editable_ids = array();
+      foreach($editable as $te => $dept) {
+        array_push($editable_ids, $te);
+      }
+      foreach($g as $k => $v) {
+        $update = date("c");
+        if(in_array($k, $editable_ids)) {
+          array_push($data, array("id"=>$k, "goal_title"=>$v, "deptcanedit"=>"true", "updated"=>$update));
+        } else {
+          array_push($data, array("id"=>$k, "goal_title"=>$v, "deptcanedit"=>"false", "updated"=>$update));
+        }
+      }
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+      curl_setopt($ch, CURLOPT_URL, $goal_db);
+      curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+      curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
+      curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+      curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+      curl_exec($ch);
+
+
+      $activity_data = array("activity_type"=>"Goal Update","date"=>$update,"user"=>$username,"message"=>json_encode($data));
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+      curl_setopt($ch, CURLOPT_URL, $activity_db);
+      curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+      curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
+      curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($activity_data));
+      curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+      curl_exec($ch);
+    }
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
+    curl_setopt($ch, CURLOPT_URL, $goal_db);
+    $result = curl_exec($ch);
+    $goals=json_decode($result, true);
   ?>
   <html>
   <head>
@@ -53,14 +89,23 @@
       <script src="../../assets/js/getgoals.js"></script>
       <script type="text/javascript">
       $(document).ready(function(){
-        var data = <?php include("../../assets/php/getgoals.php"); ?>;
+        var data = <?php echo json_encode($goals); ?>;
+        var departments = <?php echo $departments ?>;
+        var dept_mapping = {};
+        for(d in departments) {
+          dept_mapping[departments[d]["departmentid"]] = departments[d]["department"];
+        }
         var table = "";
         for(d in data) {
           table += "<tr>";
-          table += "<td><a href='"+data[d]["url"]+"' target='_blank'>" + data[d]["id"] + "</a></td>";
-          table += "<td><input type='text' name='goal["+"'"+data[d]["id"]+"'"+"]' value='" + data[d]["name"] + "' /></td>";
-          table += "<td><a href='"+data[d]["dashboard_url"]+"' target='_blank'>" + data[d]["dashboard"] + "</a></td>";
-          table += "<td><input type='checkbox' name='DeptCanEdit' /></td>";
+          table += "<td>" + data[d]["id"] + "</td>";
+          table += "<td><input type='text' name='goal["+data[d]["id"]+"]' value='" + data[d]["goal_title"] + "' /></td>";
+          table += "<td>" + dept_mapping[data[d]["department"]] + "</td>";
+          if(data[d]["deptcanedit"] == "true"){
+            table += "<td><input type='checkbox' name='DeptCanEdit["+data[d]["id"]+"]' checked /></td>";
+          } else {
+            table += "<td><input type='checkbox' name='DeptCanEdit["+data[d]["id"]+"]' /></td>";
+          }
           table += "<td><a href='admin_grid.php?goal="+data[d]["id"]+"'>Manage and Approve Data</td>";
           table += "</tr>";
         }
@@ -170,6 +215,7 @@
                         <div class="card">
                           <div class="content">
                             <input type="submit" value="Update Goals" />
+                            <a target="_blank" style="float:right" href="<?php echo str_replace(".json","",str_replace("resource","d",$goal_db)); ?>">View Dataset</a>
                           </div>
                         </div>
                       </div>
@@ -182,7 +228,7 @@
                                       <thead>
                                         <th>Goal ID</th>
                                         <th>Goal Name</th>
-                                        <th>Goal Dashboard</th>
+                                        <th>Department</th>
                                         <th>Departments Can Edit</th>
                                         <th></th>
                                       </thead>

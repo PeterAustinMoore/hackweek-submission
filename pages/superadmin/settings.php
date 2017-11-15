@@ -1,4 +1,5 @@
 <?php
+$goal_db = "https://peter.demo.socrata.com/resource/6arr-drzi.json";
 $base_url = "https://peter.demo.socrata.com";
 $users_db = "https://peter.demo.socrata.com/resource/mnj2-zafk.json";
 $departments_db = "https://peter.demo.socrata.com/resource/6z67-xud9.json";

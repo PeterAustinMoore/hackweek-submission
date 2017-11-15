@@ -1,18 +1,14 @@
 <?php
     include("../superadmin/settings.php");
+    $username = getenv("username");
+    $password = getenv("password");
 
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_URL, $departments_db);
+    curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
+    curl_setopt($ch, CURLOPT_URL, $goal_db);
     $result = curl_exec($ch);
-    $departments = json_decode($result, true);
-    $department_selection = "<select id='department' name='departments'>";
-    $department_lookup = array();
-    foreach($departments as $department) {
-      array_push($department_lookup, array($department["departmentid"]=>$department["department"]));
-      $department_selection.="<option value='department[".$department["departmentid"]."]'>".$department["department"]."</option>";
-    }
-    $department_selection .= "</select>";
+    $goals=json_decode($result, true);
   ?>
   <html>
   <head>
@@ -46,12 +42,29 @@
 
       <!--  Fonts and icons     -->
       <link href="http://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet">
-      <link href='https://fonts.googleapis.com/css?family=Muli:400,300' rel='stylesheet' type='text/css'>
       <link href="../../assets/css/themify-icons.css" rel="stylesheet">
+      <script>
+      $(document).ready(function(){
+        var data = <?php echo json_encode($goals); ?>;
+
+        var table = "";
+        for(d in data) {
+          table += "<tr>";
+          table += "<td>" + data[d]["id"] + "</td>";
+          table += "<td><input type='text' name='goal["+data[d]["id"]+"]' value='" + data[d]["goal_title"] + "' /></td>";
+          table += "<td>"+ data[d]["target"]+"</td>";
+          table += "<td><input type='text' /></td>";
+          table += "<td><input type='text' /></td>";
+          table += "<td><input type='text' /></td>";
+          table += "<td><input type='text' /></td>";
+          table += "</tr>";
+        }
+        document.getElementById("tb").innerHTML = table;
+      });
+      </script>
   </head>
   <body>
     <div class="wrapper">
-
       <div class="sidebar" data-background-color="white" data-active-color="danger">
 
         <!--
@@ -123,7 +136,7 @@
                           <span class="icon-bar bar2"></span>
                           <span class="icon-bar bar3"></span>
                       </button>
-                      <a class="navbar-brand" href="#">Manage and Approve</a>
+                      <a class="navbar-brand" href="#">Data</a>
                   </div>
                   <div class="collapse navbar-collapse">
                       <ul class="nav navbar-nav navbar-right">
@@ -140,16 +153,8 @@
                     <div class="col-md-12">
                         <div class="card">
                           <div class="content">
-                            <input name="allowDeptChange" type="checkbox" /> Allow Departments to Alter Goal Name and Target
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="card">
-                          <div class="content">
-                            <input type="submit" />
+                            <input type="submit" name="reject" value="Reject with note" />
+                            <input type="submit" name="approve" value="Approve" />
                           </div>
                         </div>
                       </div>
@@ -160,33 +165,21 @@
                               <div class="content table-responsive table-full-width">
                                   <table class="table table-striped">
                                       <thead>
+                                        <tr>
+                                          <th colspan="3"></th>
+                                          <th colspan="4" style="text-align:center" id="year">2017</th>
+                                        </tr>
+                                        <tr>
                                           <th>Goal ID</th>
-                                        <th>Goal Name</th>
-                                        <th>Target</th>
-                                        <th>Q1</th>
-                                        <th>Q2</th>
-                                        <th>Q3</th>
-                                        <th>Q4</th>
+                                          <th>Goal Name</th>
+                                          <th>Target</th>
+                                          <th style="text-align:center">Q1</th>
+                                          <th style="text-align:center">Q2</th>
+                                          <th style="text-align:center">Q3</th>
+                                          <th style="text-align:center">Q4</th>
+                                        </tr>
                                       </thead>
-                                      <tbody>
-                                          <tr>
-                                            <td>1</td>
-                                            <td>Percent of Completion</td>
-                                            <td>100</td>
-                                            <td>100</td>
-                                            <td>96</td>
-                                            <td><input type="text" name='department' value="New Value" /></td>
-                                            <td></td>
-                                          </tr>
-                                          <tr>
-                                            <td>2</td>
-                                            <td>Number of Incidents</td>
-                                            <td>5</td>
-                                            <td>3</td>
-                                            <td>2</td>
-                                            <td><input type="text" name='department' value="New Value" /></td>
-                                            <td></td>
-                                          </tr>
+                                      <tbody id="tb">
                                       </tbody>
                                   </table>
 

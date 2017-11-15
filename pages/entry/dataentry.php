@@ -1,4 +1,15 @@
-<?php  include("../../settings.php"); ?>
+<?php
+    include("../superadmin/settings.php");
+    $username = getenv("username");
+    $password = getenv("password");
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
+    curl_setopt($ch, CURLOPT_URL, $goal_db);
+    $result = curl_exec($ch);
+    $goals=json_decode($result, true);
+  ?>
 <!doctype html>
 <html lang="en">
 <head>
@@ -7,7 +18,7 @@
 	<link rel="icon" type="image/png" sizes="96x96" href="assets/img/favicon.png">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 
-	<title>Paper Dashboard by Creative Tim</title>
+	<title>Data Entry</title>
 
 	<meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
     <meta name="viewport" content="width=device-width" />
@@ -38,53 +49,25 @@
     <link href="http://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet">
     <link href='https://fonts.googleapis.com/css?family=Muli:400,300' rel='stylesheet' type='text/css'>
     <link href="../../assets/css/themify-icons.css" rel="stylesheet">
-    <script>
-    $(document).ready(function(){
-      function fastpivot(a){"use strict";var t={};if("string"!=typeof a&&a.length>0){var l=Object.keys(a[0]),n={};l.forEach(function(a){n[a]={},n[a]._labels=[],n[a]._labelsdata=[],n[a]._data={}}),a.forEach(function(a,t){l.forEach(function(t){var l=a[t];n[t]._data[l]=(n[t]._data[l]||0)+1,n[t]._labels[l]=null})}),l.forEach(function(a){for(var t in n[a]._data)n[a]._labelsdata.push(n[a]._data[t]);n[a]._labels=Object.keys(n[a]._labels)}),t=n}return t}
+		<script>
+		$(document).ready(function(){
+			var data = <?php echo json_encode($goals); ?>;
 
-      var url = "https://peter.demo.socrata.com/resource/rwxv-uhfm.json?$where=department=%27Community%20Development%27&$order=measure";
-      var data = {};
-      $.ajax({
-            url: url,
-            dataType: 'json',
-            async: false,
-            success: function(output) {
-              data = output;
-            }
-          });
-          console.log(data);
-          var same_set = [];
-          var pivoted = []
-        for(var i = 0; i < data.length - 1; i++) {
-          var next = i + 1;
-          if(data[i]["measure"] === data[next]["measure"]) {
-            same_set.push(data[i]);
-          } else {
-            same_set.push(data[i]);
-            var pivoteddata = fastpivot(same_set);
-            var d = pivoteddata["year_quarter"]._labels.map(function(e, i){
-                return [e, pivoteddata["value"]._labels[i]];
-            });
-            pivoted.push({"id":pivoteddata["measureid"]._labels[0],"measure":pivoteddata["measure"]._labels[0],"data":d});
-            same_set = [];
-          }
-        }
-        var table = "";
-        for(i in pivoted) {
-          table += "<tr>";
-          table += "<td>" + pivoted[i]["id"] + "</td>";
-          table += "<td>" + pivoted[i]["measure"] + "</td>";
-          for(j in pivoted[i]["data"]) {
-            if(j < 5) {
-              table += "<td>" + pivoted[i]["data"][j][1] + "</td>"
-            }
-          }
-          table += "</tr>";
-        }
-        document.getElementById("tb").innerHTML = table;
-
-    });
-    </script>
+			var table = "";
+			for(d in data) {
+				table += "<tr>";
+				table += "<td>" + data[d]["id"] + "</td>";
+				table += "<td>" + data[d]["goal_title"] + "</td>";
+				table += "<td>"+ data[d]["target"]+"</td>";
+				table += "<td><input type='text' /></td>";
+				table += "<td><input type='text' /></td>";
+				table += "<td><input type='text' /></td>";
+				table += "<td><input type='text' /></td>";
+				table += "</tr>";
+			}
+			document.getElementById("tb").innerHTML = table;
+		});
+		</script>
 
 </head>
 <body>
@@ -125,7 +108,7 @@
                         <span class="icon-bar bar2"></span>
                         <span class="icon-bar bar3"></span>
                     </button>
-                    <a class="navbar-brand" href="#">Table List</a>
+                    <a class="navbar-brand" href="#">Goal Data</a>
                 </div>
                 <div class="collapse navbar-collapse">
                     <ul class="nav navbar-nav navbar-right">
@@ -142,7 +125,8 @@
                   <div class="col-md-12">
                       <div class="card">
                         <div class="content">
-                          <input type="submit" value="Submit" />
+                          <input type="submit" value="Save" />
+													<input type="submit" value="Submit for Approval" />
                         </div>
                       </div>
                     </div>
@@ -150,25 +134,26 @@
                 <div class="row">
                     <div class="col-md-12">
                         <div class="card">
-                            <div class="header">
-                                <h4 class="title">Striped Table</h4>
-                                <p class="category">Here is a subtitle for this table</p>
-                            </div>
                             <div class="content table-responsive table-full-width">
-                                <table class="table table-striped">
-                                  <thead>
-                                      <th>Goal ID</th>
-                                    <th>Goal Name</th>
-                                    <th>Target</th>
-                                    <th>Q1</th>
-                                    <th>Q2</th>
-                                    <th>Q3</th>
-                                    <th>Q4</th>
-                                  </thead>
-                                  <tbody id="tb">
-
-                                  </tbody>
-                                </table>
+															<table class="table table-striped">
+																	<thead>
+																		<tr>
+																			<th colspan="3"></th>
+																			<th colspan="4" style="text-align:center" id="year">2017</th>
+																		</tr>
+																		<tr>
+																			<th>Goal ID</th>
+																			<th>Goal Name</th>
+																			<th>Target</th>
+																			<th style="text-align:center">Q1</th>
+																			<th style="text-align:center">Q2</th>
+																			<th style="text-align:center">Q3</th>
+																			<th style="text-align:center">Q4</th>
+																		</tr>
+																	</thead>
+																	<tbody id="tb">
+																	</tbody>
+															</table>
 
                             </div>
                         </div>

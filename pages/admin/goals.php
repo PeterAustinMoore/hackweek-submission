@@ -106,7 +106,7 @@
           } else {
             table += "<td><input type='checkbox' name='DeptCanEdit["+data[d]["id"]+"]' /></td>";
           }
-          table += "<td><a href='admin_grid.php?goal="+data[d]["id"]+"'>Manage and Approve Data</td>";
+          table += "<td><a href='data.php?goal="+data[d]["id"]+"'>Manage and Approve Data</td>";
           table += "</tr>";
         }
         document.getElementById("tb").innerHTML = table;
@@ -194,7 +194,7 @@
                           <span class="icon-bar bar2"></span>
                           <span class="icon-bar bar3"></span>
                       </button>
-                      <a class="navbar-brand" href="#">Manage and Approve</a>
+                      <a class="navbar-brand" href="#">Goals</a>
                   </div>
                   <div class="collapse navbar-collapse">
                       <ul class="nav navbar-nav navbar-right">
@@ -216,6 +216,19 @@
                         </div>
                       </div>
                     </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card">
+                              <div class="content">
+                                <input type="text" value="" />
+                                <select name="newGoalDept">
+                                  <option value="department">Department</option>
+                                </select>
+                                <input type="submit" value="Create Goal" />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                 <div class="row">
                     <div class="col-md-12">
                         <div class="card">

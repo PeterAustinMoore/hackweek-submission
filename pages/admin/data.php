@@ -9,12 +9,23 @@
     $result = curl_exec($ch);
     $settings=json_decode($result, true);
 
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
-    curl_setopt($ch, CURLOPT_URL, $goal_db);
-    $result = curl_exec($ch);
-    $goals=json_decode($result, true);
-
+    if(isset($_SERVER['QUERY_STRING'])) {
+      $g_id_str = $_SERVER['QUERY_STRING'];
+      #TODO: Sanitize this
+      $g_id = explode("=", $g_id_str);
+      $url = $goal_db.'?$where'."=id='".$g_id[1]."'";
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+      curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
+      curl_setopt($ch, CURLOPT_URL, $url);
+      $result = curl_exec($ch);
+      $goals=json_decode($result, true);
+    } else {
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+      curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
+      curl_setopt($ch, CURLOPT_URL, $goal_db);
+      $result = curl_exec($ch);
+      $goals=json_decode($result, true);
+    }
     $c = count($goals);
     $dept_mapping = array();
     for($i = 0; $i < $c; $i ++) {
@@ -24,9 +35,9 @@
     if(isset($_POST["goal"])) {
       $g = $_POST["goal"];
       $fy = $_POST["fiscal_year"];
+      $data = array();
       foreach($g as $kk => $vv) {
         $d = $_POST[$kk];
-        $data = array();
         foreach($d as $k => $v) {
           $update = date("c");
           $id = $kk."-".$k."-".$fy;
@@ -37,7 +48,7 @@
           $fiscal_year = $fy;
           $date_key = 'quarter'.$k;
           $date = $settings[0][$date_key]."/".$fy;
-          $value = $v;
+          $value = str_replace("undefined","",$v);
           array_push($data, array("id"=>$id, "goal_id"=>$goal_id, "goal_title"=>$goal_title, "department"=> $department, "period" => $period, "fiscal_year" => $fiscal_year, "date" => $date, "value" => $value, "updated"=>$update));
           }
       }
@@ -50,23 +61,32 @@
       curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
       curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
       curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+      curl_exec($ch);
+
+      # Department Staging Table Update
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+      curl_setopt($ch, CURLOPT_URL, $department_data_db);
+      curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+      curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
+      curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+      curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+      curl_exec($ch);
+
+      # Staging Table Update
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+      curl_setopt($ch, CURLOPT_URL, $staging_data_db);
+      curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+      curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
+      curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+      curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
       $r = curl_exec($ch);
       $res = json_decode($r, true);
 
       if($res["Errors"] == 0) {
         echo "<script>alert('Data updated successfully!')</script>";
+      } else {
+        echo "<script>alert('".$r."')</script>";
       }
-
-
-      # Department Staging Table Update
-#      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-#      curl_setopt($ch, CURLOPT_URL, $production_data_db);
-#      curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-#      curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
-#      curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-#      curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-#      curl_exec($ch);
-
 
 #      $activity_data = array("activity_type"=>"Data Update","date"=>$update,"user"=>$username,"message"=>json_encode($data));
 #      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -77,12 +97,13 @@
 #      curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
 #      curl_exec($ch);
     }
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
-    curl_setopt($ch, CURLOPT_URL, $production_data_db);
-    $result = curl_exec($ch);
-    $prod_data=json_decode($result, true);
+      $ch = curl_init();
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+      curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
+      curl_setopt($ch, CURLOPT_URL, $department_data_db);
+      $result = curl_exec($ch);
+      $prod_data=json_decode($result, true);
+
   ?>
   <html>
   <head>
@@ -120,35 +141,48 @@
       <script>
       $(document).ready(function(){
         var goals = <?php echo json_encode($goals); ?>;
+        var prod_data = <?php echo json_encode($prod_data); ?>;
+        console.log(goals);
+        var data_for_table = {};
+
         var goal_lookup = {};
         for(g in goals) {
           goal_lookup[goals[g]['id']] = {"title":goals[g]["goal_title"], "target":goals[g]["target"], "department":goals[g]["department"]};
-        }
-
-        var prod_data = <?php echo json_encode($prod_data); ?>;
-        var data_for_table = {};
-        for(p in prod_data) {
-          var quarter = "quarter"+prod_data[p]["period"];
-          var fy = prod_data[p]["fiscal_year"];
-          var id = prod_data[p]["id"]
-          data_for_table[prod_data[p]["goal_id"]] = Object.assign({[fy]:{}}, data_for_table[prod_data[p]["goal_id"]]);
-          data_for_table[prod_data[p]["goal_id"]][fy] = Object.assign({"title":goal_lookup[prod_data[p]["goal_id"]]["title"], "department":goal_lookup[prod_data[p]["goal_id"]]["department"], "target":goal_lookup[prod_data[p]["goal_id"]]["target"], "id":id,  [quarter]: prod_data[p]["value"]},data_for_table[prod_data[p]["goal_id"]][fy]);
-        }
-        var table = "";
-        for(key in data_for_table) {
-          for(year in data_for_table[key]) {
-            if(year == 2017) {
-              table += "<tr>";
-              table += "<td>" + key + "</td>";
-              table += "<td><input type='text' name='goal["+key+"]' autocomplete='off' value='" + data_for_table[key][year]["title"] + "' /></td>";
-              table += "<td>"+ data_for_table[key][year]["target"]+"</td>";
-              table += "<td><input name='"+key+"[1]' type='text' value="+ data_for_table[key][year]["quarter1"]+" /></td>";
-              table += "<td><input name='"+key+"[2]' type='text' value="+ data_for_table[key][year]["quarter2"]+" /></td>";
-              table += "<td><input name='"+key+"[3]' type='text' value="+ data_for_table[key][year]["quarter3"]+" /></td>";
-              table += "<td><input name='"+key+"[4]' type='text' value="+ data_for_table[key][year]["quarter4"]+" /></td>";
-              table += "</tr>";
+          data_for_table[goals[g]["id"]] = {"title":goals[g]["goal_title"], "target":goals[g]["target"], "department":goals[g]["department"]};
+          for(p in prod_data) {
+            if(prod_data[p]["goal_id"] == goals[g]["id"]) {
+              var quarter = "quarter"+prod_data[p]["period"];
+              var fy = prod_data[p]["fiscal_year"];
+              var id = prod_data[p]["id"]
+              data_for_table[prod_data[p]["goal_id"]] = Object.assign({"data":{[fy]:{}}, "title":goal_lookup[prod_data[p]["goal_id"]]["title"], "department":goal_lookup[prod_data[p]["goal_id"]]["department"], "target":goal_lookup[prod_data[p]["goal_id"]]["target"]}, data_for_table[prod_data[p]["goal_id"]]);
+              data_for_table[prod_data[p]["goal_id"]]["data"][fy] = Object.assign({"id":id, [quarter]: prod_data[p]["value"]},data_for_table[prod_data[p]["goal_id"]]["data"][fy]);
             }
           }
+        }
+
+        var table = "";
+        for(key in data_for_table) {
+          table += "<tr>";
+          table += "<td>" + key + "</td>";
+          table += "<td><input type='text' name='goal["+key+"]' autocomplete='off' value='" + data_for_table[key]["title"] + "' /></td>";
+          table += "<td>"+ data_for_table[key]["target"]+"</td>";
+          if("data" in data_for_table[key]) {
+            for(year in data_for_table[key]["data"]) {
+              if(year == 2017) {
+                table += "<td><input name='"+key+"[1]' type='text' value="+ ((data_for_table[key]["data"][year]["quarter1"] !== undefined) ? data_for_table[key]["data"][year]["quarter1"] : "''") +" /></td>";
+                table += "<td><input name='"+key+"[2]' type='text' value="+ ((data_for_table[key]["data"][year]["quarter2"] !== undefined) ? data_for_table[key]["data"][year]["quarter2"] : "''")+" /></td>";
+                table += "<td><input name='"+key+"[3]' type='text' value="+ ((data_for_table[key]["data"][year]["quarter3"] !== undefined) ? data_for_table[key]["data"][year]["quarter3"] : "''")+" /></td>";
+                table += "<td><input name='"+key+"[4]' type='text' value="+ ((data_for_table[key]["data"][year]["quarter4"] !== undefined) ? data_for_table[key]["data"][year]["quarter4"] : "''")+" /></td>";
+
+              }
+            }
+          } else {
+            table += "<td><input name='"+key+"[1]' type='text' value='' /></td>";
+            table += "<td><input name='"+key+"[2]' type='text' value='' /></td>";
+            table += "<td><input name='"+key+"[3]' type='text' value='' /></td>";
+            table += "<td><input name='"+key+"[4]' type='text' value='' /></td>";
+          }
+          table += "</tr>";
         }
         document.getElementById("tb").innerHTML = table;
       });

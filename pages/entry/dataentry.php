@@ -6,9 +6,58 @@
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
+    curl_setopt($ch, CURLOPT_URL, $settings_db);
+    $result = curl_exec($ch);
+    $settings=json_decode($result, true);
+
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
     curl_setopt($ch, CURLOPT_URL, $goal_db);
     $result = curl_exec($ch);
     $goals=json_decode($result, true);
+
+    if(isset($_POST["goal"])) {
+      $g = $_POST["goal"];
+      $fy = $_POST["fiscal_year"];
+      $data = array();
+      foreach($g as $kk => $vv) {
+        $d = $_POST[$kk];
+        foreach($d as $k => $v) {
+          $update = date("c");
+          $id = $kk."-".$k."-".$fy;
+          $goal_id = $kk;
+          $goal_title = $vv;
+          $department = $dept_mapping[$kk];
+          $period = $k;
+          $fiscal_year = $fy;
+          $date_key = 'quarter'.$k;
+          $date = $settings[0][$date_key]."/".$fy;
+          $value = str_replace("undefined","",$v);
+          array_push($data, array("id"=>$id, "goal_id"=>$goal_id, "goal_title"=>$goal_title, "department"=> $department, "period" => $period, "fiscal_year" => $fiscal_year, "date" => $date, "value" => $value, "updated"=>$update));
+          }
+      }
+
+      # Staging Table Update
+      $ch = curl_init();
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+      curl_setopt($ch, CURLOPT_URL, $staging_data_db);
+      curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+      curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
+      curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+      curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+
+      $r = curl_exec($ch);
+      $res = json_decode($r, true);
+      if($res["Errors"] == 0) {
+        echo "<script>alert('Data updated successfully!')</script>";
+      }
+    }
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
+    curl_setopt($ch, CURLOPT_URL, $staging_data_db);
+    $result = curl_exec($ch);
+    $staging_data=json_decode($result, true);
   ?>
 <!doctype html>
 <html lang="en">
@@ -49,25 +98,53 @@
     <link href="http://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet">
     <link href='https://fonts.googleapis.com/css?family=Muli:400,300' rel='stylesheet' type='text/css'>
     <link href="../../assets/css/themify-icons.css" rel="stylesheet">
-		<script>
-		$(document).ready(function(){
-			var data = <?php echo json_encode($goals); ?>;
+    <script>
+    $(document).ready(function(){
+      var goals = <?php echo json_encode($goals); ?>;
+      var prod_data = <?php echo json_encode($staging_data); ?>;
+      var data_for_table = {};
 
-			var table = "";
-			for(d in data) {
-				table += "<tr>";
-				table += "<td>" + data[d]["id"] + "</td>";
-				table += "<td>" + data[d]["goal_title"] + "</td>";
-				table += "<td>"+ data[d]["target"]+"</td>";
-				table += "<td><input type='text' /></td>";
-				table += "<td><input type='text' /></td>";
-				table += "<td><input type='text' /></td>";
-				table += "<td><input type='text' /></td>";
-				table += "</tr>";
-			}
-			document.getElementById("tb").innerHTML = table;
-		});
-		</script>
+      var goal_lookup = {};
+      for(g in goals) {
+        goal_lookup[goals[g]['id']] = {"title":goals[g]["goal_title"], "target":goals[g]["target"], "department":goals[g]["department"]};
+        data_for_table[goals[g]["id"]] = {"title":goals[g]["goal_title"], "target":goals[g]["target"], "department":goals[g]["department"]};
+        for(p in prod_data) {
+          if(prod_data[p]["goal_id"] == goals[g]["id"]) {
+            var quarter = "quarter"+prod_data[p]["period"];
+            var fy = prod_data[p]["fiscal_year"];
+            var id = prod_data[p]["id"]
+            data_for_table[prod_data[p]["goal_id"]] = Object.assign({"data":{[fy]:{}}, "title":goal_lookup[prod_data[p]["goal_id"]]["title"], "department":goal_lookup[prod_data[p]["goal_id"]]["department"], "target":goal_lookup[prod_data[p]["goal_id"]]["target"]}, data_for_table[prod_data[p]["goal_id"]]);
+            data_for_table[prod_data[p]["goal_id"]]["data"][fy] = Object.assign({"id":id, [quarter]: prod_data[p]["value"]},data_for_table[prod_data[p]["goal_id"]]["data"][fy]);
+          }
+        }
+      }
+
+      var table = "";
+      for(key in data_for_table) {
+        table += "<tr>";
+        table += "<td>" + key + "</td>";
+        table += "<td><input type='text' name='goal["+key+"]' autocomplete='off' value='" + data_for_table[key]["title"] + "' /></td>";
+        table += "<td>"+ data_for_table[key]["target"]+"</td>";
+        if("data" in data_for_table[key]) {
+          for(year in data_for_table[key]["data"]) {
+            if(year == 2017) {
+              table += "<td><input name='"+key+"[1]' type='text' value="+ ((data_for_table[key]["data"][year]["quarter1"] !== undefined) ? data_for_table[key]["data"][year]["quarter1"] : "''") +" /></td>";
+              table += "<td><input name='"+key+"[2]' type='text' value="+ ((data_for_table[key]["data"][year]["quarter2"] !== undefined) ? data_for_table[key]["data"][year]["quarter2"] : "''")+" /></td>";
+              table += "<td><input name='"+key+"[3]' type='text' value="+ ((data_for_table[key]["data"][year]["quarter3"] !== undefined) ? data_for_table[key]["data"][year]["quarter3"] : "''")+" /></td>";
+              table += "<td><input name='"+key+"[4]' type='text' value="+ ((data_for_table[key]["data"][year]["quarter4"] !== undefined) ? data_for_table[key]["data"][year]["quarter4"] : "''")+" /></td>";
+            }
+          }
+        } else {
+          table += "<td><input name='"+key+"[1]' type='text' value='' /></td>";
+          table += "<td><input name='"+key+"[2]' type='text' value='' /></td>";
+          table += "<td><input name='"+key+"[3]' type='text' value='' /></td>";
+          table += "<td><input name='"+key+"[4]' type='text' value='' /></td>";
+        }
+        table += "</tr>";
+      }
+      document.getElementById("tb").innerHTML = table;
+    });
+    </script>
 
 </head>
 <body>
@@ -120,6 +197,7 @@
 
 
         <div class="content">
+          <form name="departments" method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
             <div class="container-fluid">
               <div class="row">
                   <div class="col-md-12">
@@ -139,7 +217,7 @@
 																	<thead>
 																		<tr>
 																			<th colspan="3"></th>
-																			<th colspan="4" style="text-align:center" id="year">2017</th>
+																			<th colspan="4" style="text-align:center" id="year"><input type="text" name="fiscal_year" readonly value="2017" /></th>
 																		</tr>
 																		<tr>
 																			<th>Goal ID</th>
@@ -160,6 +238,7 @@
                     </div>
                 </div>
             </div>
+          </form>
         </div>
     </div>
 </div>

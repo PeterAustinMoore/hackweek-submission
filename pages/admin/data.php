@@ -13,27 +13,27 @@
       $g_id_str = $_SERVER['QUERY_STRING'];
       #TODO: Sanitize this
       $g_id = explode("=", $g_id_str);
-      $url = $goal_db.'?$where'."=id='".$g_id[1]."'";
+      $url = $metric_db.'?$where'."=id='".$g_id[1]."'";
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
       curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
       curl_setopt($ch, CURLOPT_URL, $url);
       $result = curl_exec($ch);
-      $goals=json_decode($result, true);
+      $metrics=json_decode($result, true);
     } else {
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
       curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
-      curl_setopt($ch, CURLOPT_URL, $goal_db);
+      curl_setopt($ch, CURLOPT_URL, $metric_db);
       $result = curl_exec($ch);
-      $goals=json_decode($result, true);
+      $metrics=json_decode($result, true);
     }
-    $c = count($goals);
-    $dept_mapping = array();
+    $c = count($metrics);
+    $prog_mapping = array();
     for($i = 0; $i < $c; $i ++) {
-      $dept_mapping[$goals[$i]["id"]] = $goals[$i]["department"];
+      $prog_mapping[$metrics[$i]["id"]] = $metrics[$i]["program"];
     }
 
-    if(isset($_POST["goal"])) {
-      $g = $_POST["goal"];
+    if(isset($_POST["metric"])) {
+      $g = $_POST["metric"];
       $fy = $_POST["fiscal_year"];
       $data = array();
       foreach($g as $kk => $vv) {
@@ -41,15 +41,15 @@
         foreach($d as $k => $v) {
           $update = date("c");
           $id = $kk."-".$k."-".$fy;
-          $goal_id = $kk;
-          $goal_title = $vv;
-          $department = $dept_mapping[$kk];
+          $metric_id = $kk;
+          $metric_title = $vv;
+          $program = $prog_mapping[$kk];
           $period = $k;
           $fiscal_year = $fy;
           $date_key = 'quarter'.$k;
           $date = $settings[0][$date_key]."/".$fy;
           $value = str_replace("undefined","",$v);
-          array_push($data, array("id"=>$id, "goal_id"=>$goal_id, "goal_title"=>$goal_title, "department"=> $department, "period" => $period, "fiscal_year" => $fiscal_year, "date" => $date, "value" => $value, "updated"=>$update));
+          array_push($data, array("id"=>$id, "metric_id"=>$metric_id, "metric_title"=>$metric_title, "program"=> $program, "period" => $period, "fiscal_year" => $fiscal_year, "date" => $date, "value" => $value, "updated"=>$update));
           }
       }
 
@@ -65,16 +65,7 @@
 
       # Department Staging Table Update
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-      curl_setopt($ch, CURLOPT_URL, $department_data_db);
-      curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-      curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
-      curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-      curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-      curl_exec($ch);
-
-      # Staging Table Update
-      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-      curl_setopt($ch, CURLOPT_URL, $staging_data_db);
+      curl_setopt($ch, CURLOPT_URL, $program_data_db);
       curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
       curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
       curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
@@ -100,7 +91,7 @@
       $ch = curl_init();
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
       curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
-      curl_setopt($ch, CURLOPT_URL, $department_data_db);
+      curl_setopt($ch, CURLOPT_URL, $program_data_db);
       $result = curl_exec($ch);
       $prod_data=json_decode($result, true);
 
@@ -140,31 +131,30 @@
       <link href="../../assets/css/themify-icons.css" rel="stylesheet">
       <script>
       $(document).ready(function(){
-        var goals = <?php echo json_encode($goals); ?>;
+        var metrics = <?php echo json_encode($metrics); ?>;
         var prod_data = <?php echo json_encode($prod_data); ?>;
-        console.log(goals);
+        console.log(metrics);
         var data_for_table = {};
 
-        var goal_lookup = {};
-        for(g in goals) {
-          goal_lookup[goals[g]['id']] = {"title":goals[g]["goal_title"], "target":goals[g]["target"], "department":goals[g]["department"]};
-          data_for_table[goals[g]["id"]] = {"title":goals[g]["goal_title"], "target":goals[g]["target"], "department":goals[g]["department"]};
+        var metric_lookup = {};
+        for(g in metrics) {
+          metric_lookup[metrics[g]['id']] = {"title":metrics[g]["metric_title"], "target":metrics[g]["target"], "program":metrics[g]["program"]};
+          data_for_table[metrics[g]["id"]] = {"title":metrics[g]["metric_title"], "target":metrics[g]["target"], "program":metrics[g]["program"]};
           for(p in prod_data) {
-            if(prod_data[p]["goal_id"] == goals[g]["id"]) {
+            if(prod_data[p]["metric_id"] == metrics[g]["id"]) {
               var quarter = "quarter"+prod_data[p]["period"];
               var fy = prod_data[p]["fiscal_year"];
               var id = prod_data[p]["id"]
-              data_for_table[prod_data[p]["goal_id"]] = Object.assign({"data":{[fy]:{}}, "title":goal_lookup[prod_data[p]["goal_id"]]["title"], "department":goal_lookup[prod_data[p]["goal_id"]]["department"], "target":goal_lookup[prod_data[p]["goal_id"]]["target"]}, data_for_table[prod_data[p]["goal_id"]]);
-              data_for_table[prod_data[p]["goal_id"]]["data"][fy] = Object.assign({"id":id, [quarter]: prod_data[p]["value"]},data_for_table[prod_data[p]["goal_id"]]["data"][fy]);
+              data_for_table[prod_data[p]["metric_id"]] = Object.assign({"data":{[fy]:{}}, "title":metric_lookup[prod_data[p]["metric_id"]]["title"], "program":metric_lookup[prod_data[p]["metric_id"]]["program"], "target":metric_lookup[prod_data[p]["metric_id"]]["target"]}, data_for_table[prod_data[p]["metric_id"]]);
+              data_for_table[prod_data[p]["metric_id"]]["data"][fy] = Object.assign({"id":id, [quarter]: prod_data[p]["value"]},data_for_table[prod_data[p]["metric_id"]]["data"][fy]);
             }
           }
         }
-
         var table = "";
         for(key in data_for_table) {
           table += "<tr>";
           table += "<td>" + key + "</td>";
-          table += "<td><input type='text' name='goal["+key+"]' autocomplete='off' value='" + data_for_table[key]["title"] + "' /></td>";
+          table += "<td><input type='text' name='metric["+key+"]' autocomplete='off' value='" + data_for_table[key]["title"] + "' /></td>";
           table += "<td>"+ data_for_table[key]["target"]+"</td>";
           if("data" in data_for_table[key]) {
             for(year in data_for_table[key]["data"]) {
@@ -212,27 +202,27 @@
                       </a>
                   </li>
                     <li>
-                        <a href="departments.php">
+                        <a href="programs.php">
                             <i class="ti-view-list-alt"></i>
-                            <p>Departments</p>
+                            <p>Programs</p>
                         </a>
                     </li>
                     <li>
-                        <a href="goals.php">
+                        <a href="metrics.php">
                             <i class="ti-view-list-alt"></i>
-                            <p>Goals</p>
+                            <p>Metrics</p>
                         </a>
                     </li>
                     <li class="active">
                         <a href="#">
                             <i class="ti-check-box"></i>
-                            <p>Manage and Approve</p>
+                            <p>Approve Data</p>
                         </a>
                     </li>
                     <li>
-                        <a href="narratives.php">
+                        <a href="methods.php">
                             <i class="ti-view-list-alt"></i>
-                            <p>Narratives</p>
+                            <p>Methodology</p>
                         </a>
                     </li>
                     <li>
@@ -261,7 +251,7 @@
                           <span class="icon-bar bar2"></span>
                           <span class="icon-bar bar3"></span>
                       </button>
-                      <a class="navbar-brand" href="#">Manage and Approve</a>
+                      <a class="navbar-brand" href="#">Metric Data</a>
                   </div>
                   <div class="collapse navbar-collapse">
                       <ul class="nav navbar-nav navbar-right">
@@ -272,7 +262,7 @@
 
 
           <div class="content">
-            <form name="departments" method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
+            <form name="programs" method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
               <div class="container-fluid">
                 <div class="row">
                     <div class="col-md-12">
@@ -296,8 +286,8 @@
                                           <th colspan="4" style="text-align:center" id="year"><input type="text" name="fiscal_year" readonly value="2017" /></th>
                                         </tr>
                                         <tr>
-                                          <th>Goal ID</th>
-                                          <th>Goal Name</th>
+                                          <th>Metric ID</th>
+                                          <th>Metric Name</th>
                                           <th>Target</th>
                                           <th style="text-align:center">Q1</th>
                                           <th style="text-align:center">Q2</th>

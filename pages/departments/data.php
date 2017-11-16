@@ -5,21 +5,21 @@
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
-    curl_setopt($ch, CURLOPT_URL, $goal_db);
+    curl_setopt($ch, CURLOPT_URL, $metric_db);
     $result = curl_exec($ch);
-    $goals=json_decode($result, true);
+    $metrics=json_decode($result, true);
 
     $ch = curl_init();
-    $url = $goal_db.'?$where=deptcanedit='."'true'";
+    $url = $metric_db.'?$where=canedit='."'true'";
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
     $result = curl_exec($ch);
     $data = json_decode($result, true);
     if(count($data) > 0) {
-      $DeptCanEdit = true;
+      $CanEdit = true;
     } else {
-      $DeptCanEdit = false;
+      $CanEdit = false;
     }
 
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -30,12 +30,18 @@
 
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
-    curl_setopt($ch, CURLOPT_URL, $goal_db);
+    curl_setopt($ch, CURLOPT_URL, $metric_db);
     $result = curl_exec($ch);
-    $goals=json_decode($result, true);
+    $metrics=json_decode($result, true);
 
-    if(isset($_POST["goal"])) {
-      $g = $_POST["goal"];
+    $c = count($metrics);
+    $prog_mapping = array();
+    for($i = 0; $i < $c; $i ++) {
+      $prog_mapping[$metrics[$i]["id"]] = $metrics[$i]["program"];
+    }
+
+    if(isset($_POST["metric"])) {
+      $g = $_POST["metric"];
       $fy = $_POST["fiscal_year"];
       $data = array();
       foreach($g as $kk => $vv) {
@@ -44,22 +50,22 @@
           if($v) {
             $update = date("c");
             $id = $kk."-".$k."-".$fy;
-            $goal_id = $kk;
-            $goal_title = $vv;
-            $department = $dept_mapping[$kk];
+            $metric_id = $kk;
+            $metric_title = $vv;
+            $program = $prog_mapping[$kk];
             $period = $k;
             $fiscal_year = $fy;
             $date_key = 'quarter'.$k;
             $date = $settings[0][$date_key]."/".$fy;
             $value = str_replace("undefined","",$v);
-            array_push($data, array("id"=>$id, "goal_id"=>$goal_id, "goal_title"=>$goal_title, "department"=> $department, "period" => $period, "fiscal_year" => $fiscal_year, "date" => $date, "value" => $value, "updated"=>$update));
+            array_push($data, array("id"=>$id, "metric_id"=>$metric_id, "metric_title"=>$metric_title, "program"=> $program, "period" => $period, "fiscal_year" => $fiscal_year, "date" => $date, "value" => $value, "updated"=>$update));
             }
           }
       }
-      # Dept Staging Table Update
+      # Program Staging Table Update
       $ch = curl_init();
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-      curl_setopt($ch, CURLOPT_URL, $department_data_db);
+      curl_setopt($ch, CURLOPT_URL, $program_data_db);
       curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
       curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
       curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
@@ -85,7 +91,7 @@
     curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
     curl_setopt($ch, CURLOPT_URL, $staging_data_db);
     $result = curl_exec($ch);
-    $dept_data=json_decode($result, true);
+    $prog_data=json_decode($result, true);
 ?>
 <html>
 <head>
@@ -123,21 +129,21 @@
     <link href="../../assets/css/themify-icons.css" rel="stylesheet">
     <script>
     $(document).ready(function(){
-      var goals = <?php echo json_encode($goals); ?>;
-      var prod_data = <?php echo json_encode($dept_data); ?>;
+      var metrics = <?php echo json_encode($metrics); ?>;
+      var prod_data = <?php echo json_encode($prog_data); ?>;
       var data_for_table = {};
 
-      var goal_lookup = {};
-      for(g in goals) {
-        goal_lookup[goals[g]['id']] = {"title":goals[g]["goal_title"], "target":goals[g]["target"], "department":goals[g]["department"]};
-        data_for_table[goals[g]["id"]] = {"title":goals[g]["goal_title"], "target":goals[g]["target"], "department":goals[g]["department"]};
+      var metric_lookup = {};
+      for(g in metrics) {
+        metric_lookup[metrics[g]['id']] = {"title":metrics[g]["metric_title"], "target":metrics[g]["target"], "program":metrics[g]["program"]};
+        data_for_table[metrics[g]["id"]] = {"title":metrics[g]["metric_title"], "target":metrics[g]["target"], "program":metrics[g]["program"]};
         for(p in prod_data) {
-          if(prod_data[p]["goal_id"] == goals[g]["id"]) {
+          if(prod_data[p]["metric_id"] == metrics[g]["id"]) {
             var quarter = "quarter"+prod_data[p]["period"];
             var fy = prod_data[p]["fiscal_year"];
             var id = prod_data[p]["id"]
-            data_for_table[prod_data[p]["goal_id"]] = Object.assign({"data":{[fy]:{}}, "title":goal_lookup[prod_data[p]["goal_id"]]["title"], "department":goal_lookup[prod_data[p]["goal_id"]]["department"], "target":goal_lookup[prod_data[p]["goal_id"]]["target"]}, data_for_table[prod_data[p]["goal_id"]]);
-            data_for_table[prod_data[p]["goal_id"]]["data"][fy] = Object.assign({"id":id, [quarter]: prod_data[p]["value"]},data_for_table[prod_data[p]["goal_id"]]["data"][fy]);
+            data_for_table[prod_data[p]["metric_id"]] = Object.assign({"data":{[fy]:{}}, "title":metric_lookup[prod_data[p]["metric_id"]]["title"], "program":metric_lookup[prod_data[p]["metric_id"]]["program"], "target":metric_lookup[prod_data[p]["metric_id"]]["target"]}, data_for_table[prod_data[p]["metric_id"]]);
+            data_for_table[prod_data[p]["metric_id"]]["data"][fy] = Object.assign({"id":id, [quarter]: prod_data[p]["value"]},data_for_table[prod_data[p]["metric_id"]]["data"][fy]);
           }
         }
       }
@@ -146,7 +152,7 @@
       for(key in data_for_table) {
         table += "<tr>";
         table += "<td>" + key + "</td>";
-        table += "<td><input type='text' name='goal["+key+"]' autocomplete='off' value='" + data_for_table[key]["title"] + "' /></td>";
+        table += "<td><input type='text' name='metric["+key+"]' autocomplete='off' value='" + data_for_table[key]["title"] + "' /></td>";
         table += "<td>"+ data_for_table[key]["target"]+"</td>";
         if("data" in data_for_table[key]) {
           for(year in data_for_table[key]["data"]) {
@@ -198,10 +204,16 @@
                           <p>Approve Data</p>
                       </a>
                   </li>
-                  <?php if($DeptCanEdit){
-                    echo "<li><a href='deptadmin_goals.php'><i class='ti-view-list-alt'></i><p>Goals</p></a></li>";
+                  <?php if($CanEdit){
+                    echo "<li><a href='metrics.php'><i class='ti-view-list-alt'></i><p>Metrics</p></a></li>";
                     }
                   ?>
+                  <li>
+                      <a href="methods.php">
+                          <i class="ti-email"></i>
+                          <p>Methodology</p>
+                      </a>
+                  </li>
                   <li>
                       <a href="notifications.php">
                           <i class="ti-email"></i>
@@ -235,7 +247,7 @@
 
             <div class="content">
                 <div class="container-fluid">
-                  <form name="departments" method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
+                  <form name="programs" method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
                     <div class="row">
                         <div class="col-md-12">
                             <div class="card">
@@ -260,8 +272,8 @@
                                           <th colspan="4" style="text-align:center" id="year"><input type="text" name="fiscal_year" readonly value="2017" /></th>
                                         </tr>
                                         <tr>
-                                          <th>Goal ID</th>
-                                          <th>Goal Name</th>
+                                          <th>Metric ID</th>
+                                          <th>Metric Name</th>
                                           <th>Target</th>
                                           <th style="text-align:center">Q1</th>
                                           <th style="text-align:center">Q2</th>

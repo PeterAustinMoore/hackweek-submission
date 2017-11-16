@@ -12,45 +12,11 @@
 
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
-    curl_setopt($ch, CURLOPT_URL, $goal_db);
+    curl_setopt($ch, CURLOPT_URL, $metric_db);
     $result = curl_exec($ch);
-    $goals=json_decode($result, true);
+    $metrics=json_decode($result, true);
 
-    if(isset($_POST["goal"])) {
-      $g = $_POST["goal"];
-      $fy = $_POST["fiscal_year"];
-      $data = array();
-      foreach($g as $kk => $vv) {
-        $d = $_POST[$kk];
-        foreach($d as $k => $v) {
-          $update = date("c");
-          $id = $kk."-".$k."-".$fy;
-          $goal_id = $kk;
-          $goal_title = $vv;
-          $department = $dept_mapping[$kk];
-          $period = $k;
-          $fiscal_year = $fy;
-          $date_key = 'quarter'.$k;
-          $date = $settings[0][$date_key]."/".$fy;
-          $value = str_replace("undefined","",$v);
-          array_push($data, array("id"=>$id, "goal_id"=>$goal_id, "goal_title"=>$goal_title, "department"=> $department, "period" => $period, "fiscal_year" => $fiscal_year, "date" => $date, "value" => $value, "updated"=>$update));
-          }
-      }
-
-      # Staging Table Update
-      $ch = curl_init();
-      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-      curl_setopt($ch, CURLOPT_URL, $staging_data_db);
-      curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-      curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
-      curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-      curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-
-      $r = curl_exec($ch);
-      $res = json_decode($r, true);
-      if($res["Errors"] == 0) {
-        echo "<script>alert('Data updated successfully!')</script>";
-      }
+    if(isset($_POST["metric"])) { echo "";
     }
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -100,21 +66,21 @@
     <link href="../../assets/css/themify-icons.css" rel="stylesheet">
     <script>
     $(document).ready(function(){
-      var goals = <?php echo json_encode($goals); ?>;
+      var metrics = <?php echo json_encode($metrics); ?>;
       var prod_data = <?php echo json_encode($staging_data); ?>;
       var data_for_table = {};
 
-      var goal_lookup = {};
-      for(g in goals) {
-        goal_lookup[goals[g]['id']] = {"title":goals[g]["goal_title"], "target":goals[g]["target"], "department":goals[g]["department"]};
-        data_for_table[goals[g]["id"]] = {"title":goals[g]["goal_title"], "target":goals[g]["target"], "department":goals[g]["department"]};
+      var metric_lookup = {};
+      for(g in metrics) {
+        metric_lookup[metrics[g]['id']] = {"title":metrics[g]["metric_title"], "target":metrics[g]["target"], "department":metrics[g]["department"]};
+        data_for_table[metrics[g]["id"]] = {"title":metrics[g]["metric_title"], "target":metrics[g]["target"], "department":metrics[g]["department"]};
         for(p in prod_data) {
-          if(prod_data[p]["goal_id"] == goals[g]["id"]) {
+          if(prod_data[p]["metric_id"] == metrics[g]["id"]) {
             var quarter = "quarter"+prod_data[p]["period"];
             var fy = prod_data[p]["fiscal_year"];
             var id = prod_data[p]["id"]
-            data_for_table[prod_data[p]["goal_id"]] = Object.assign({"data":{[fy]:{}}, "title":goal_lookup[prod_data[p]["goal_id"]]["title"], "department":goal_lookup[prod_data[p]["goal_id"]]["department"], "target":goal_lookup[prod_data[p]["goal_id"]]["target"]}, data_for_table[prod_data[p]["goal_id"]]);
-            data_for_table[prod_data[p]["goal_id"]]["data"][fy] = Object.assign({"id":id, [quarter]: prod_data[p]["value"]},data_for_table[prod_data[p]["goal_id"]]["data"][fy]);
+            data_for_table[prod_data[p]["metric_id"]] = Object.assign({"data":{[fy]:{}}, "title":metric_lookup[prod_data[p]["metric_id"]]["title"], "department":metric_lookup[prod_data[p]["metric_id"]]["department"], "target":metric_lookup[prod_data[p]["metric_id"]]["target"]}, data_for_table[prod_data[p]["metric_id"]]);
+            data_for_table[prod_data[p]["metric_id"]]["data"][fy] = Object.assign({"id":id, [quarter]: prod_data[p]["value"]},data_for_table[prod_data[p]["metric_id"]]["data"][fy]);
           }
         }
       }
@@ -123,24 +89,8 @@
       for(key in data_for_table) {
         table += "<tr>";
         table += "<td>" + key + "</td>";
-        table += "<td><input type='text' name='goal["+key+"]' autocomplete='off' value='" + data_for_table[key]["title"] + "' /></td>";
-        table += "<td>"+ data_for_table[key]["target"]+"</td>";
-        if("data" in data_for_table[key]) {
-          for(year in data_for_table[key]["data"]) {
-            if(year == 2017) {
-              table += "<td><input name='"+key+"[1]' type='text' value="+ ((data_for_table[key]["data"][year]["quarter1"] !== undefined) ? data_for_table[key]["data"][year]["quarter1"] : "''") +" /></td>";
-              table += "<td><input name='"+key+"[2]' type='text' value="+ ((data_for_table[key]["data"][year]["quarter2"] !== undefined) ? data_for_table[key]["data"][year]["quarter2"] : "''")+" /></td>";
-              table += "<td><input name='"+key+"[3]' type='text' value="+ ((data_for_table[key]["data"][year]["quarter3"] !== undefined) ? data_for_table[key]["data"][year]["quarter3"] : "''")+" /></td>";
-              table += "<td><input name='"+key+"[4]' type='text' value="+ ((data_for_table[key]["data"][year]["quarter4"] !== undefined) ? data_for_table[key]["data"][year]["quarter4"] : "''")+" /></td>";
-            }
-          }
-        } else {
-          table += "<td><input name='"+key+"[1]' type='text' value='' /></td>";
-          table += "<td><input name='"+key+"[2]' type='text' value='' /></td>";
-          table += "<td><input name='"+key+"[3]' type='text' value='' /></td>";
-          table += "<td><input name='"+key+"[4]' type='text' value='' /></td>";
-        }
-        table += "</tr>";
+        table += "<td><input type='text' name='metric["+key+"]' autocomplete='off' value='" + data_for_table[key]["title"] + "' /></td>";
+        table += "<td><textarea name='methods["+key+"]' rows='7' cols='50'></textarea></td>";
       }
       document.getElementById("tb").innerHTML = table;
     });
@@ -165,10 +115,16 @@
             </div>
 
             <ul class="nav">
+                <li>
+                    <a href="data.php">
+                        <i class="ti-view-list-alt"></i>
+                        <p>Data</p>
+                    </a>
+                </li>
                 <li class="active">
                     <a href="#">
                         <i class="ti-view-list-alt"></i>
-                        <p>Goals</p>
+                        <p>Methodology</p>
                     </a>
                 </li>
             </ul>
@@ -185,7 +141,7 @@
                         <span class="icon-bar bar2"></span>
                         <span class="icon-bar bar3"></span>
                     </button>
-                    <a class="navbar-brand" href="#">Goal Data</a>
+                    <a class="navbar-brand" href="#">Metric Data</a>
                 </div>
                 <div class="collapse navbar-collapse">
                     <ul class="nav navbar-nav navbar-right">
@@ -216,17 +172,9 @@
 															<table class="table table-striped">
 																	<thead>
 																		<tr>
-																			<th colspan="3"></th>
-																			<th colspan="4" style="text-align:center" id="year"><input type="text" name="fiscal_year" readonly value="2017" /></th>
-																		</tr>
-																		<tr>
-																			<th>Goal ID</th>
-																			<th>Goal Name</th>
-																			<th>Target</th>
-																			<th style="text-align:center">Q1</th>
-																			<th style="text-align:center">Q2</th>
-																			<th style="text-align:center">Q3</th>
-																			<th style="text-align:center">Q4</th>
+																			<th>Metric ID</th>
+																			<th>Metric Name</th>
+																			<th style="text-align:center">Methodology</th>
 																		</tr>
 																	</thead>
 																	<tbody id="tb">

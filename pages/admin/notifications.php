@@ -146,27 +146,27 @@ if(count($data) > 0) {
                   </a>
               </li>
                 <li>
-                    <a href="departments.php">
+                    <a href="programs.php">
                         <i class="ti-view-list-alt"></i>
-                        <p>Departments</p>
+                        <p>Programs</p>
                     </a>
                 </li>
                 <li>
-                    <a href="goals.php">
+                    <a href="metrics.php">
                         <i class="ti-view-list-alt"></i>
-                        <p>Goals</p>
+                        <p>Metrics</p>
                     </a>
                 </li>
                 <li>
                     <a href="data.php">
                         <i class="ti-check-box"></i>
-                        <p>Manage and Approve</p>
+                        <p>Approve Data</p>
                     </a>
                 </li>
                 <li>
-                    <a href="narratives.php">
+                    <a href="methods.php">
                         <i class="ti-view-list-alt"></i>
-                        <p>Narratives</p>
+                        <p>Methodology</p>
                     </a>
                 </li>
                 <li>
@@ -223,8 +223,8 @@ if(count($data) > 0) {
                     <div class="col-md-12">
                       <div class="card">
                         <label><input type="checkbox" name="all" id="all"/>All Activities</label><br>
-                        <label><input type="checkbox" name="goals" id="goals"ondragover=""/>On Goal Name Change</label><br>
-                        <label><input type="checkbox"name="data" id="data" />On Goal Data Change</label><br>
+                        <label><input type="checkbox" name="goals" id="goals"ondragover=""/>On Metric Name Change</label><br>
+                        <label><input type="checkbox"name="data" id="data" />On Metric Data Change</label><br>
                       </div>
                     </div>
                   </div>

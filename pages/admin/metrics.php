@@ -5,33 +5,33 @@
 
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_URL, $departments_db);
+    curl_setopt($ch, CURLOPT_URL, $programs_db);
     $result = curl_exec($ch);
-    $departments_raw = json_decode($result, true);
+    $programs_raw = json_decode($result, true);
 
-    $departments = json_encode($departments_raw);
+    $programs = json_encode($programs_raw);
 
-    if(isset($_POST["goal"])) {
+    if(isset($_POST["metric"])) {
       $data = array();
-      $g = $_POST["goal"];
+      $g = $_POST["metric"];
       $u = $_POST["unit"];
       $t = $_POST["timeframe"];
-      $dept = $_POST["department"];
-      $editable = $_POST["DeptCanEdit"];
+      $prog = $_POST["program"];
+      $editable = $_POST["CanEdit"];
       $editable_ids = array();
-      foreach($editable as $te => $dept) {
+      foreach($editable as $te => $prog) {
         array_push($editable_ids, $te);
       }
       foreach($g as $k => $v) {
         $update = date("c");
         if(in_array($k, $editable_ids)) {
-          array_push($data, array("id"=>$k, "goal_title"=>$v, "timeframe" => $t[$k], "department" => $dept[$k], "deptcanedit"=>"true", "updated"=>$update));
+          array_push($data, array("id"=>$k, "metric_title"=>$v, "timeframe" => $t[$k], "unit" => $u[$k], "program" => $prog[$k], "canedit"=>"true", "updated"=>$update));
         } else {
-          array_push($data, array("id"=>$k, "goal_title"=>$v, "timeframe" => $t[$k], "department" => $dept[$k], "deptcanedit"=>"false", "updated"=>$update));
+          array_push($data, array("id"=>$k, "metric_title"=>$v, "timeframe" => $t[$k], "unit" => $u[$k], "program" => $prog[$k], "canedit"=>"false", "updated"=>$update));
         }
       }
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-      curl_setopt($ch, CURLOPT_URL, $goal_db);
+      curl_setopt($ch, CURLOPT_URL, $metric_db);
       curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
       curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
       curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
@@ -39,7 +39,7 @@
       curl_exec($ch);
 
 
-      $activity_data = array("activity_type"=>"Goal Update","date"=>$update,"user"=>$username,"message"=>json_encode($data));
+      $activity_data = array("activity_type"=>"Metric Update","date"=>$update,"user"=>$username,"message"=>json_encode($data));
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
       curl_setopt($ch, CURLOPT_URL, $activity_db);
       curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
@@ -52,10 +52,10 @@
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
-    curl_setopt($ch, CURLOPT_URL, $goal_db);
+    curl_setopt($ch, CURLOPT_URL, $metric_db);
     $result = curl_exec($ch);
-    $goals=json_decode($result, true);
-    $goal_count = count($goals);
+    $metrics=json_decode($result, true);
+    $metric_count = count($metrics);
   ?>
   <html>
   <head>
@@ -89,28 +89,27 @@
       <!--  Fonts and icons     -->
       <link href="http://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet">
       <link href='https://fonts.googleapis.com/css?family=Muli:400,300' rel='stylesheet' type='text/css'>
-      <link href="../../assets/css/themify-icons.css" rel="stylesheet">
-      <script src="../../assets/js/getgoals.js"></script>
+      <link href="../../assets/css/themify-icons.css" rel="stylesheet">>
       <script type="text/javascript">
       $(document).ready(function(){
         var timeframe = ["quarterly", "annual", "monthly"];
-        var data = <?php echo json_encode($goals); ?>;
-        var departments = <?php echo $departments ?>;
-        var dept_mapping = {};
-        for(d in departments) {
-          dept_mapping[departments[d]["departmentid"]] = departments[d]["department"];
+        var data = <?php echo json_encode($metrics); ?>;
+        var programs = <?php echo $programs ?>;
+        var prog_mapping = {};
+        for(d in programs) {
+          prog_mapping[programs[d]["id"]] = programs[d]["program"];
         }
         var table = "";
         for(d in data) {
           table += "<tr>";
           table += "<td>" + data[d]["id"] + "</td>";
-          table += "<td><input type='text' name='goal["+data[d]["id"]+"]' value='" + data[d]["goal_title"] + "' /></td>";
-          table += "<td><select name='department["+data[d]["id"]+"]'>";
-          for(dd in dept_mapping){
-            if(dd == data[d]["department"]) {
-              table += "<option selected value=" + data[d]["department"] + ">" + dept_mapping[data[d]["department"]] + "</option>";
+          table += "<td><input type='text' name='metric["+data[d]["id"]+"]' value='" + data[d]["metric_title"] + "' /></td>";
+          table += "<td><select name='program["+data[d]["id"]+"]'>";
+          for(dd in prog_mapping){
+            if(dd == data[d]["program"]) {
+              table += "<option selected value=" + data[d]["program"] + ">" + prog_mapping[data[d]["program"]] + "</option>";
             } else {
-              table += "<option value=" + dd + ">" + dept_mapping[dd] + "</option>";
+              table += "<option value=" + dd + ">" + prog_mapping[dd] + "</option>";
             }
           }
           table += "<td><select name='timeframe["+data[d]["id"]+"]'>"
@@ -124,39 +123,39 @@
           table += "</select></td>";
           table += "<td>" + data[d]["category"] + "</td>";
           table += "<td><input type='text' name='unit["+data[d]["id"]+"]' value='" + data[d]["unit"] + "' /></td>";
-          if(data[d]["deptcanedit"] == "true"){
-            table += "<td><input type='checkbox' name='DeptCanEdit["+data[d]["id"]+"]' checked /></td>";
+          if(data[d]["canedit"] == "true"){
+            table += "<td><input type='checkbox' name='CanEdit["+data[d]["id"]+"]' checked /></td>";
           } else {
-            table += "<td><input type='checkbox' name='DeptCanEdit["+data[d]["id"]+"]' /></td>";
+            table += "<td><input type='checkbox' name='CanEdit["+data[d]["id"]+"]' /></td>";
           }
-          table += "<td><a href='data.php?goal="+data[d]["id"]+"'>Manage and Approve Data</td>";
+          table += "<td><a href='data.php?metric="+data[d]["id"]+"'>Manage and Approve Data</td>";
           table += "</tr>";
         }
         document.getElementById("tb").innerHTML = table;
 
 
-        var current_goal_count = <?php echo (int)$goal_count + 1 ?>;
+        var current_metric_count = <?php echo (int)$metric_count + 1 ?>;
 
-        // New Goal Layout
-        var newGoal = current_goal_count + "  ";
-        newGoal += "<input type='text' id='newName' value='' placeholder='Goal Title' />"
-        newGoal += "<select id='newDept'>"
-        for(dd in dept_mapping) {
-          newGoal += "<option value=" + dd + ">"+ dept_mapping[dd]+"</option>";
+        // New Metric Layout
+        var newMetric = current_metric_count + "  ";
+        newMetric += "<input type='text' id='newName' value='' placeholder='Metric Title' />"
+        newMetric += "<select id='newMetric'>"
+        for(dd in prog_mapping) {
+          newMetric += "<option value=" + dd + ">"+ prog_mapping[dd]+"</option>";
         }
-        newGoal += "</select><select id='newTimeframe'>";
+        newMetric += "</select><select id='newTimeframe'>";
         for(t in timeframe) {
-          newGoal += "<option value='"+ timeframe[t]+"'>"+timeframe[t]+"</option>";
+          newMetric += "<option value='"+ timeframe[t]+"'>"+timeframe[t]+"</option>";
         }
-        newGoal += "</select>";
-        newGoal += "<input id ='newUnit' type='text' placeholder='Unit' value='' />"
-        document.getElementById("newGoal").innerHTML = newGoal;
+        newMetric += "</select>";
+        newMetric += "<input id ='newUnit' type='text' placeholder='Unit' value='' />"
+        document.getElementById("newMetric").innerHTML = newMetric;
 
-        // Create New Goal
-        $("#newGoalButton").click(function(e) {
+        // Create New Metric
+        $("#newMetricButton").click(function(e) {
           e.preventDefault();
           var newName = $("#newName").val();
-          var newDept = $("#newDept").val();
+          var newMetric = $("#newMetric").val();
           var newTimeframe = $("#newTimeframe").val();
           var newUnit = $("#newUnit").val();
           //$("table tbody").append(markup);
@@ -196,15 +195,15 @@
                       </a>
                   </li>
                     <li>
-                        <a href="departments.php">
+                        <a href="programs.php">
                             <i class="ti-view-list-alt"></i>
-                            <p>Departments</p>
+                            <p>Programs</p>
                         </a>
                     </li>
                     <li class="active">
                         <a href="#">
                             <i class="ti-view-list-alt"></i>
-                            <p>Goals</p>
+                            <p>Metrics</p>
                         </a>
                     </li>
                     <li>
@@ -214,9 +213,9 @@
                         </a>
                     </li>
                     <li>
-                        <a href="narratives.php">
+                        <a href="methods.php">
                             <i class="ti-view-list-alt"></i>
-                            <p>Narratives</p>
+                            <p>Methodology</p>
                         </a>
                     </li>
                     <li>
@@ -245,7 +244,7 @@
                           <span class="icon-bar bar2"></span>
                           <span class="icon-bar bar3"></span>
                       </button>
-                      <a class="navbar-brand" href="#">Goals</a>
+                      <a class="navbar-brand" href="#">Metrics</a>
                   </div>
                   <div class="collapse navbar-collapse">
                       <ul class="nav navbar-nav navbar-right">
@@ -256,13 +255,13 @@
 
 
           <div class="content">
-            <form name="departments" method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
+            <form name="programs" method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
               <div class="container-fluid">
                 <div class="row">
                     <div class="col-md-12">
                         <div class="card">
                           <div class="content">
-                            <input name="allowDeptChange" type="checkbox" /> Allow Departments to Alter All Goal Names and Targets
+                            <input name="allowChange" type="checkbox" /> Allow Programs to Alter All Metric Names and Targets
                           </div>
                         </div>
                       </div>
@@ -271,8 +270,8 @@
                         <div class="col-md-12">
                             <div class="card">
                               <div class="content">
-                                <div id="newGoal"></div>
-                                <input id="newGoalButton" type="submit" value="Create Goal" />
+                                <div id="newMetric"></div>
+                                <input id="newMetricButton" type="submit" value="Create Metric" />
                               </div>
                             </div>
                           </div>
@@ -281,8 +280,8 @@
                     <div class="col-md-12">
                         <div class="card">
                           <div class="content">
-                            <input type="submit" value="Update Goals" />
-                            <a target="_blank" style="float:right" href="<?php echo str_replace(".json","",str_replace("resource","d",$goal_db)); ?>">View Dataset</a>
+                            <input type="submit" value="Update Metrics" />
+                            <a target="_blank" style="float:right" href="<?php echo str_replace(".json","",str_replace("resource","d",$metric_db)); ?>">View Dataset</a>
                           </div>
                         </div>
                       </div>
@@ -293,13 +292,13 @@
                               <div class="content table-responsive table-full-width">
                                   <table class="table table-striped">
                                       <thead>
-                                        <th>Goal ID</th>
-                                        <th>Goal Name</th>
-                                        <th>Department</th>
+                                        <th>Metric ID</th>
+                                        <th>Metric Name</th>
+                                        <th>Program</th>
                                         <th>Timeframe</th>
                                         <th>Category</th>
                                         <th>Unit</th>
-                                        <th>Departments Can Edit</th>
+                                        <th>Program Admin Can Edit</th>
                                         <th></th>
                                       </thead>
                                       <tbody id="tb">

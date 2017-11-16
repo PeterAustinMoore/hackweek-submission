@@ -5,30 +5,30 @@
 
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_URL, $departments_db);
+    curl_setopt($ch, CURLOPT_URL, $programs_db);
     $result = curl_exec($ch);
-    $departments_raw = json_decode($result, true);
+    $programs_raw = json_decode($result, true);
 
-    $departments = json_encode($departments_raw);
+    $programs = json_encode($programs_raw);
 
-    if(isset($_POST["goal"])) {
+    if(isset($_POST["metric"])) {
       $data = array();
-      $g = $_POST["goal"];
-      $editable = $_POST["DeptCanEdit"];
+      $g = $_POST["metric"];
+      $editable = $_POST["CanEdit"];
       $editable_ids = array();
-      foreach($editable as $te => $dept) {
+      foreach($editable as $te => $prog) {
         array_push($editable_ids, $te);
       }
       foreach($g as $k => $v) {
         $update = date("c");
         if(in_array($k, $editable_ids)) {
-          array_push($data, array("id"=>$k, "goal_title"=>$v, "deptcanedit"=>"true", "updated"=>$update));
+          array_push($data, array("id"=>$k, "method"=>$v, "canedit"=>"true", "updated"=>$update));
         } else {
-          array_push($data, array("id"=>$k, "goal_title"=>$v, "deptcanedit"=>"false", "updated"=>$update));
+          array_push($data, array("id"=>$k, "method"=>$v, "canedit"=>"false", "updated"=>$update));
         }
       }
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-      curl_setopt($ch, CURLOPT_URL, $goal_db);
+      curl_setopt($ch, CURLOPT_URL, $metric_db);
       curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
       curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
       curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
@@ -49,9 +49,9 @@
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
-    curl_setopt($ch, CURLOPT_URL, $goal_db);
+    curl_setopt($ch, CURLOPT_URL, $metric_db);
     $result = curl_exec($ch);
-    $goals=json_decode($result, true);
+    $metrics=json_decode($result, true);
   ?>
   <html>
   <head>
@@ -86,27 +86,26 @@
       <link href="http://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet">
       <link href='https://fonts.googleapis.com/css?family=Muli:400,300' rel='stylesheet' type='text/css'>
       <link href="../../assets/css/themify-icons.css" rel="stylesheet">
-      <script src="../../assets/js/getgoals.js"></script>
       <script type="text/javascript">
       $(document).ready(function(){
-        var data = <?php echo json_encode($goals); ?>;
-        var departments = <?php echo $departments ?>;
-        var dept_mapping = {};
-        for(d in departments) {
-          dept_mapping[departments[d]["departmentid"]] = departments[d]["department"];
+        var data = <?php echo json_encode($metrics); ?>;
+        var programs = <?php echo $programs ?>;
+        var prog_mapping = {};
+        for(d in programs) {
+          prog_mapping[programs[d]["id"]] = programs[d]["program"];
         }
         var table = "";
         for(d in data) {
           table += "<tr>";
           table += "<td>" + data[d]["id"] + "</td>";
-          table += "<td><input type='text' name='goal["+data[d]["id"]+"]' value='" + data[d]["goal_title"] + "' /></td>";
-          table += "<td>" + dept_mapping[data[d]["department"]] + "</td>";
-          if(data[d]["deptcanedit"] == "true"){
-            table += "<td><input type='checkbox' name='DeptCanEdit["+data[d]["id"]+"]' checked /></td>";
+          table += "<td><input type='text' name='metric["+data[d]["id"]+"]' value='" + data[d]["metric_title"] + "' /></td>";
+          table += "<td>" + prog_mapping[data[d]["program"]] + "</td>";
+          if(data[d]["canedit"] == "true"){
+            table += "<td><input type='checkbox' name='CanEdit["+data[d]["id"]+"]' checked /></td>";
           } else {
-            table += "<td><input type='checkbox' name='DeptCanEdit["+data[d]["id"]+"]' /></td>";
+            table += "<td><input type='checkbox' name='CanEdit["+data[d]["id"]+"]' /></td>";
           }
-          table += "<td><a href='admin_grid.php?goal="+data[d]["id"]+"'>Manage and Approve Data</td>";
+          table += "<td><a href='admin_grid.php?metric="+data[d]["id"]+"'>Manage and Approve Data</td>";
           table += "</tr>";
         }
         document.getElementById("tb").innerHTML = table;
@@ -138,16 +137,20 @@
                           <p>Users</p>
                       </a>
                   </li>
-                    <li class="active">
-                        <a href="#">
-                            <i class="ti-view-list-alt"></i>
-                            <p>Goals</p>
-                        </a>
-                    </li>
                     <li>
                         <a href="data.php">
                             <i class="ti-check-box"></i>
-                            <p>Manage and Approve</p>
+                            <p>Approval Data</p>
+                        </a>
+                    </li>
+                    <?php if($CanEdit){
+                      echo "<li><a href='metrics.php'><i class='ti-view-list-alt'></i><p>Metrics</p></a></li>";
+                      }
+                    ?>
+                    <li class="active">
+                        <a href="methods.php">
+                            <i class="ti-check-box"></i>
+                            <p>Methodology</p>
                         </a>
                     </li>
                     <li>
@@ -170,7 +173,7 @@
                           <span class="icon-bar bar2"></span>
                           <span class="icon-bar bar3"></span>
                       </button>
-                      <a class="navbar-brand" href="#">Manage and Approve</a>
+                      <a class="navbar-brand" href="#">Methodology</a>
                   </div>
                   <div class="collapse navbar-collapse">
                       <ul class="nav navbar-nav navbar-right">
@@ -181,23 +184,14 @@
 
 
           <div class="content">
-            <form name="departments" method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
+            <form name="programs" method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
               <div class="container-fluid">
                 <div class="row">
                     <div class="col-md-12">
                         <div class="card">
                           <div class="content">
-                            <input name="allowDeptChange" type="checkbox" /> Allow Departments to Alter All Goal Names and Targets
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="card">
-                          <div class="content">
                             <input type="submit" value="Update Goals" />
-                            <a target="_blank" style="float:right" href="<?php echo str_replace(".json","",str_replace("resource","d",$goal_db)); ?>">View Dataset</a>
+                            <a target="_blank" style="float:right" href="<?php echo str_replace(".json","",str_replace("resource","d",$metric_db)); ?>">View Dataset</a>
                           </div>
                         </div>
                       </div>
@@ -208,10 +202,10 @@
                               <div class="content table-responsive table-full-width">
                                   <table class="table table-striped">
                                       <thead>
-                                        <th>Goal ID</th>
-                                        <th>Goal Name</th>
-                                        <th>Department</th>
-                                        <th>Departments Can Edit</th>
+                                        <th>Metric ID</th>
+                                        <th>Metric Name</th>
+                                        <th>Program</th>
+                                        <th>Programs Can Edit</th>
                                         <th></th>
                                       </thead>
                                       <tbody id="tb">

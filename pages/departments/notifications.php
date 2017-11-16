@@ -63,16 +63,16 @@ if(isset($_POST["users"])) {
 }
 
 $ch = curl_init();
-$url = $goal_db.'?$where=deptcanedit='."'true'";
+$url = $goal_db.'?$where=canedit='."'true'";
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_URL, $url);
 curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
 $result = curl_exec($ch);
 $data = json_decode($result, true);
 if(count($data) > 0) {
-  $DeptCanEdit = true;
+  $CanEdit = true;
 } else {
-  $DeptCanEdit = false;
+  $CanEdit = false;
 }
 ?>
 
@@ -145,10 +145,16 @@ if(count($data) > 0) {
                             <p>Approve Data</p>
                         </a>
                     </li>
-                    <?php if($DeptCanEdit){
-                      echo "<li><a href='goals.php'><i class='ti-view-list-alt'></i><p>Goals</p></a></li>";
+                    <?php if($CanEdit){
+                      echo "<li><a href='metrics.php'><i class='ti-view-list-alt'></i><p>Metrics</p></a></li>";
                       }
                     ?>
+                    <li>
+                        <a href="methods.php">
+                            <i class="ti-email"></i>
+                            <p>Methodology</p>
+                        </a>
+                    </li>
                     <li class="active">
                         <a href="#">
                             <i class="ti-email"></i>

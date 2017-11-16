@@ -1,4 +1,4 @@
-<?php
+program<?php
 include("../superadmin/settings.php");
 
 $ch = curl_init();
@@ -6,9 +6,9 @@ $ch = curl_init();
 $username = getenv("username");
 $password = getenv("password");
 
-if(isset($_POST["department"])) {
+if(isset($_POST["program"])) {
   $data = array();
-  $d = $_POST["department"];
+  $d = $_POST["program"];
   $deleted = $_POST["delete"];
   $added = $_POST["add"];
   $del_ids = array();
@@ -22,13 +22,13 @@ if(isset($_POST["department"])) {
   foreach($d as $k => $v) {
     $update = date("c");
     if(in_array($k, $del_ids) && !in_array($k, $add_ids)) {
-      array_push($data, array("departmentid"=>$k, "department"=>$v, "updated"=>$update,"isdeleted"=>"true"));
+      array_push($data, array("id"=>$k, "program"=>$v, "updated"=>$update,"isdeleted"=>"true"));
     } else {
-      array_push($data, array("departmentid"=>$k, "department"=>$v, "updated"=>$update,"isdeleted"=>"false"));
+      array_push($data, array("id"=>$k, "program"=>$v, "updated"=>$update,"isdeleted"=>"false"));
     }
   }
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-  curl_setopt($ch, CURLOPT_URL, $departments_db);
+  curl_setopt($ch, CURLOPT_URL, $programs_db);
   curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
   curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
   curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
@@ -72,10 +72,10 @@ if(isset($_POST["department"])) {
     <script type="text/javascript">
     $(document).ready(function(){
         $(".add-row").click(function(){
-          $.getJSON('<?php echo $departments_db ?>?$select=max(departmentid)', function(data){
-            var name = $("#department").val();
-            var current_id = parseInt(data[0]["max_departmentid"]) + 1;
-            var markup = "<tr><td><input name='delete["+current_id.toString()+"]' type='checkbox' /><td>"+current_id.toString()+"</td><td><input name=department["+current_id.toString()+"] type='text' value='"+name+"' /></td></tr>";
+          $.getJSON('<?php echo $programs_db ?>?$select=max(id)', function(data){
+            var name = $("#program").val();
+            var current_id = parseInt(data[0]["max_id"]) + 1;
+            var markup = "<tr><td><input name='delete["+current_id.toString()+"]' type='checkbox' /><td>"+current_id.toString()+"</td><td><input name=program["+current_id.toString()+"] type='text' value='"+name+"' /></td></tr>";
             $("table tbody").append(markup);
           });
         });
@@ -137,25 +137,25 @@ if(isset($_POST["department"])) {
                   <li class="active">
                       <a href="#">
                           <i class="ti-view-list-alt"></i>
-                          <p>Departments</p>
+                          <p>Programs</p>
                       </a>
                   </li>
                   <li>
-                      <a href="goals.php">
+                      <a href="metrics.php">
                           <i class="ti-view-list-alt"></i>
-                          <p>Goals</p>
+                          <p>Metrics</p>
                       </a>
                   </li>
                   <li>
                       <a href="data.php">
                           <i class="ti-check-box"></i>
-                          <p>Manage and Approve</p>
+                          <p>Approve Data</p>
                       </a>
                   </li>
                   <li>
-                      <a href="narratives.php">
+                      <a href="methods.php">
                           <i class="ti-view-list-alt"></i>
-                          <p>Narratives</p>
+                          <p>Methodology</p>
                       </a>
                   </li>
                   <li>
@@ -184,7 +184,7 @@ if(isset($_POST["department"])) {
                         <span class="icon-bar bar2"></span>
                         <span class="icon-bar bar3"></span>
                     </button>
-                    <a class="navbar-brand" href="#">Departments</a>
+                    <a class="navbar-brand" href="#">Programs</a>
                 </div>
                 <div class="collapse navbar-collapse">
                     <ul class="nav navbar-nav navbar-right">
@@ -201,14 +201,14 @@ if(isset($_POST["department"])) {
                         <div class="card">
                           <div class="content">
                             <form>
-                                <input type="text" id="department" placeholder="Department">
-                                <input type="button" class="add-row" value="Add Department">
+                                <input type="text" id="program" placeholder="Program">
+                                <input type="button" class="add-row" value="Add Program">
                             </form>
                           </div>
                         </div>
                       </div>
                     </div>
-                    <form autocomplete="off" name="departments" method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
+                    <form autocomplete="off" name="programs" method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
                       <div class="row">
                           <div class="col-md-12">
                               <div class="card">
@@ -230,22 +230,22 @@ if(isset($_POST["department"])) {
                                   <thead>
                                       <tr>
                                           <th>Remove</th>
-                                          <th>Department ID</th>
-                                          <th>Department</th>
+                                          <th>Program ID</th>
+                                          <th>Program</th>
                                       </tr>
                                   </thead>
                                   <tbody>
                                     <?php
                                     $ch = curl_init();
-                                    $url = $departments_db.'?$order=departmentid%20asc&$where=isdeleted='."'false'";
-                                    if(!isset($_POST["departments"])) {
+                                    $url = $programs_db.'?$order=id%20asc&$where=isdeleted='."'false'";
+                                    if(!isset($_POST["programs"])) {
                                       curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                                       curl_setopt($ch, CURLOPT_URL, $url);
                                       $r = curl_exec($ch);
                                       $data = json_decode($r, true);
                                       $tbody = "";
                                       for ($i = 0; $i < count($data); $i++) {
-                                        $tbody.="<tr><td><input name='delete[".$data[$i]["departmentid"]."]' type='checkbox' /></td><td id='deptId'>".$data[$i]["departmentid"]."</td><td><input name='department[".$data[$i]["departmentid"]."]' type='text' value='".$data[$i]["department"]."' /></td></tr>";
+                                        $tbody.="<tr><td><input name='delete[".$data[$i]["id"]."]' type='checkbox' /></td><td>".$data[$i]["id"]."</td><td><input name='program[".$data[$i]["id"]."]' type='text' value='".$data[$i]["program"]."' /></td></tr>";
                                       }
                                       echo $tbody;
                                       }
@@ -256,22 +256,22 @@ if(isset($_POST["department"])) {
                                 <thead>
                                     <tr>
                                         <th>Add Back</th>
-                                        <th>Department ID</th>
-                                        <th>Department</th>
+                                        <th>Program ID</th>
+                                        <th>Program</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                   <?php
                                   $ch = curl_init();
-                                  $url = $departments_db.'?$order=departmentid%20asc&$where=isdeleted='."'true'";
-                                  if(!isset($_POST["departments"])) {
+                                  $url = $programs_db.'?$order=id%20asc&$where=isdeleted='."'true'";
+                                  if(!isset($_POST["programs"])) {
                                     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                                     curl_setopt($ch, CURLOPT_URL, $url);
                                     $r = curl_exec($ch);
                                     $data = json_decode($r, true);
                                     $tbody = "";
                                     for ($i = 0; $i < count($data); $i++) {
-                                      $tbody.="<tr><td><input name=delete[".$data[$i]["departmentid"]."] type='hidden' value='deleted' /> <input name='add[".$data[$i]["departmentid"]."]' type='checkbox' /></td><td>".$data[$i]["departmentid"]."</td><td><input name='department[".$data[$i]["departmentid"]."]' type='text' value='".$data[$i]["department"]."' /></td></tr>";
+                                      $tbody.="<tr><td><input name=delete[".$data[$i]["id"]."] type='hidden' value='deleted' /> <input name='add[".$data[$i]["id"]."]' type='checkbox' /></td><td>".$data[$i]["id"]."</td><td><input name='program[".$data[$i]["id"]."]' type='text' value='".$data[$i]["program"]."' /></td></tr>";
                                     }
                                     echo $tbody;
                                     }

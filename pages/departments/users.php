@@ -3,10 +3,10 @@ include("../superadmin/settings.php");
 
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_URL, $departments_db.'?$where=departmentid='."'1'");
+curl_setopt($ch, CURLOPT_URL, $programs_db.'?$where=programid='."'1'");
 $result = curl_exec($ch);
-$departments = json_decode($result, true);
-$department = $departments[0]["department"];
+$programs = json_decode($result, true);
+$program = $programs[0]["program"];
 
 $username = getenv("username");
 $password = getenv("password");
@@ -22,23 +22,23 @@ $users_array = $users["results"];
 if(isset($_POST["users"])) {
   $data = array();
   $u = $_POST["users"];
-  $d = $_POST["departments"];
+  $d = $_POST["programs"];
   $deleted = $_POST["delete"];
   $added = $_POST["add"];
   $del_ids = array();
-  foreach($deleted as $td => $dept) {
+  foreach($deleted as $td => $prog) {
     array_push($del_ids, $td);
   }
   $add_ids = array();
-  foreach($added as $ta => $dept_a) {
+  foreach($added as $ta => $prog_a) {
     array_push($add_ids, $ta);
   }
   foreach($u as $k => $v) {
     $update = date("c");
     if(in_array($k, $del_ids) && !in_array($k, $add_ids)) {
-      array_push($data, array("userid"=>$k, "email"=>$v, "departmentid"=>$d[$k], "updated"=>$update,"isdeleted"=>"true"));
+      array_push($data, array("id"=>$k, "email"=>$v, "programid"=>$d[$k], "updated"=>$update,"isdeleted"=>"true"));
     } else {
-      array_push($data, array("userid"=>$k, "email"=>$v, "departmentid"=>$d[$k], "updated"=>$update,"isdeleted"=>"false"));
+      array_push($data, array("id"=>$k, "email"=>$v, "programid"=>$d[$k], "updated"=>$update,"isdeleted"=>"false"));
     }
   }
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -60,16 +60,16 @@ if(isset($_POST["users"])) {
   curl_exec($ch);
 }
 $ch = curl_init();
-$url = $goal_db.'?$where=deptcanedit='."'true'";
+$url = $metric_db.'?$where=canedit='."'true'";
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_URL, $url);
 curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
 $result = curl_exec($ch);
 $data = json_decode($result, true);
 if(count($data) > 0) {
-  $DeptCanEdit = true;
+  $CanEdit = true;
 } else {
-  $DeptCanEdit = false;
+  $CanEdit = false;
 }
   ?>
 
@@ -115,11 +115,11 @@ if(count($data) > 0) {
       $(document).ready(function(){
         var count = 0;
         $.ajax({
-              url: "https://peter.demo.socrata.com/resource/mnj2-zafk.json?$select=max(userid)",
+              url: "https://peter.demo.socrata.com/resource/mnj2-zafk.json?$select=max(id)",
               dataType: 'json',
               async: false,
               success: function(data) {
-                count = parseInt(data[0]["max_userid"]);
+                count = parseInt(data[0]["max_id"]);
               }
             });
             var emails = <?php echo json_encode($users_array) ?>;
@@ -136,7 +136,7 @@ if(count($data) > 0) {
               document.getElementById("errors").innerHTML = "Email address not list of acceptable users please see <a target='_blank' href='<?php echo $base_url ?>/admin/users'>Users Administration</a>";
             } else {
                 count = count + 1;
-                var markup = "<tr><td><input type='checkbox' name='deleted["+count.toString()+"]' /><td>"+count.toString()+"</td><td><input type='text' name='users["+count.toString()+"]' value='"+email+"' /></td><td><select id='department' name='departments["+count.toString()+"]'><?php echo $department_selection_basic ?></select></td></tr>";
+                var markup = "<tr><td><input type='checkbox' name='deleted["+count.toString()+"]' /><td>"+count.toString()+"</td><td><input type='text' name='users["+count.toString()+"]' value='"+email+"' /></td><td><select id='' name='programs["+count.toString()+"]'><?php echo $program_selection_basic ?></select></td></tr>";
                 $("table tbody").append(markup);
             }
           });
@@ -173,10 +173,16 @@ if(count($data) > 0) {
                             <p>Approve Data</p>
                         </a>
                     </li>
-                    <?php if($DeptCanEdit){
-                      echo "<li><a href='goals.php'><i class='ti-view-list-alt'></i><p>Goals</p></a></li>";
+                    <?php if($CanEdit){
+                      echo "<li><a href='metrics.php'><i class='ti-view-list-alt'></i><p>Metrics</p></a></li>";
                       }
                     ?>
+                    <li>
+                        <a href="methods.php">
+                            <i class="ti-email"></i>
+                            <p>Methodology</p>
+                        </a>
+                    </li>
                     <li>
                         <a href="notifications.php">
                             <i class="ti-email"></i>
@@ -222,7 +228,7 @@ if(count($data) > 0) {
                         </div>
                       </div>
                     </div>
-                        <form name="departments" method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
+                        <form name="s" method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
                           <div class="row">
                               <div class="col-md-12">
                                   <div class="card">
@@ -242,22 +248,21 @@ if(count($data) > 0) {
                                             <th>Remove</th>
                                             <th>User ID</th>
                                             <th>User</th>
-                                            <th>Department</th>
+                                            <th>Program</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                       <?php
-
                                       $ch = curl_init();
-                                      $url = 'https://peter.demo.socrata.com/resource/mnj2-zafk.json?$order=userid%20asc&$where=departmentid='."'1'"."%20and%20isdeleted="."'false'";
-                                      if(!isset($_POST["departments"])) {
+                                      $url = 'https://peter.demo.socrata.com/resource/mnj2-zafk.json?$order=id%20asc&$where=id='."'1'"."%20and%20isdeleted="."'false'";
+                                      if(!isset($_POST["programs"])) {
                                         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                                         curl_setopt($ch, CURLOPT_URL, $url);
                                         $r = curl_exec($ch);
                                         $data = json_decode($r, true);
                                         $tbody = "";
                                         for ($i = 0; $i < count($data); $i++) {
-                                          $tbody.="<tr><td><input type='checkbox' /></td><td>".$data[$i]["userid"]."</td><td><input name='department[".$data[$i]["userid"]."]' type='text' value='".$data[$i]["email"]."' /></td><td>".$department."</td></tr>";
+                                          $tbody.="<tr><td><input type='checkbox' /></td><td>".$data[$i]["id"]."</td><td><input name='[".$data[$i]["id"]."]' type='text' value='".$data[$i]["email"]."' /></td><td>".$program."</td></tr>";
                                         }
                                         echo $tbody;
                                         }

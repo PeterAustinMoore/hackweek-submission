@@ -67,31 +67,31 @@ include("../superadmin/settings.php");
                     </a>
                 </li>
                   <li>
-                      <a href="#">
+                      <a href="programs.php">
                           <i class="ti-view-list-alt"></i>
-                          <p>Departments</p>
+                          <p>Programs</p>
                       </a>
                   </li>
                   <li>
-                      <a href="=goals.php">
+                      <a href="metrics.php">
                           <i class="ti-view-list-alt"></i>
-                          <p>Goals</p>
+                          <p>Metrics</p>
                       </a>
                   </li>
                   <li>
                       <a href="data.php">
                           <i class="ti-check-box"></i>
-                          <p>Manage and Approve</p>
+                          <p>Approve Data</p>
                       </a>
                   </li>
                   <li>
-                      <a href="narratives.php">
+                      <a href="methods.php">
                           <i class="ti-view-list-alt"></i>
-                          <p>Narratives</p>
+                          <p>Methodology</p>
                       </a>
                   </li>
                   <li class="active">
-                      <a href="activity_log.php">
+                      <a href="#">
                           <i class="ti-view-list-alt"></i>
                           <p>Activity Log</p>
                       </a>

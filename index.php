@@ -1,8 +1,8 @@
 
 <h3>View site as a...</h3>
 <a href="pages/admin/settings.php">Site Admin</a><br>
-<a href="pages/departments/users.php">Department Admin</a><br>
-<a href="pages/entry/dataentry.php">Data Enterer</a><br>
+<a href="pages/departments/data.php">Department Admin</a><br>
+<a href="pages/entry/data.php">Data Enterer</a><br>
 
 
 <?php

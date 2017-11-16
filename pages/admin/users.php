@@ -3,13 +3,13 @@ include("../superadmin/settings.php");
 
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_URL, $departments_db);
+curl_setopt($ch, CURLOPT_URL, $programs_db);
 $result = curl_exec($ch);
-$departments = json_decode($result, true);
+$programs = json_decode($result, true);
 
-$department_selection_basic = "";
-foreach($departments as $department) {
-  $department_selection_basic .= "<option value='".$department["departmentid"]."'>".$department["department"]."</option>";
+$program_selection_basic = "";
+foreach($programs as $program) {
+  $program_selection_basic .= "<option value='".$program["id"]."'>".$program["program"]."</option>";
 }
 
 $username = getenv("username");
@@ -26,7 +26,7 @@ $users_array = $users["results"];
 if(isset($_POST["users"])) {
   $data = array();
   $u = $_POST["users"];
-  $d = $_POST["departments"];
+  $d = $_POST["programs"];
   $admin = $_POST["isAdmin"];
   $deleted = $_POST["delete"];
   $added = $_POST["add"];
@@ -41,12 +41,12 @@ if(isset($_POST["users"])) {
   foreach($u as $k => $v) {
     $update = date("c");
     if(in_array($k, $del_ids) && !in_array($k, $add_ids)) {
-      array_push($data, array("userid"=>$k, "email"=>$v, "departmentid"=>$d[$k], "updated"=>$update,"isdeleted"=>"true"));
+      array_push($data, array("id"=>$k, "email"=>$v, "programid"=>$d[$k], "updated"=>$update,"isdeleted"=>"true"));
     } else {
       if($admin[$k]) {
-        array_push($data, array("userid"=>$k, "email"=>$v, "departmentid"=>$d[$k], "updated"=>$update,"isdeleted"=>"false","isdeptadmin"=>"true"));
+        array_push($data, array("id"=>$k, "email"=>$v, "programid"=>$d[$k], "updated"=>$update,"isdeleted"=>"false","isadmin"=>"true"));
       } else {
-        array_push($data, array("userid"=>$k, "email"=>$v, "departmentid"=>$d[$k], "updated"=>$update,"isdeleted"=>"false", "isdeptadmin" => "false"));
+        array_push($data, array("id"=>$k, "email"=>$v, "programid"=>$d[$k], "updated"=>$update,"isdeleted"=>"false", "isadmin" => "false"));
       }
     }
   }
@@ -113,11 +113,11 @@ if(isset($_POST["users"])) {
         var data = goalGetter.get();
         var count = 0;
         $.ajax({
-              url: "<?php echo $users_db; ?>?$select=max(userid)",
+              url: "<?php echo $users_db; ?>?$select=max(id)",
               dataType: 'json',
               async: false,
               success: function(data) {
-                count = parseInt(data[0]["max_userid"]);
+                count = parseInt(data[0]["max_id"]);
               }
             });
             var emails = <?php echo json_encode($users_array) ?>;
@@ -134,7 +134,7 @@ if(isset($_POST["users"])) {
               document.getElementById("errors").innerHTML = "Email address not list of acceptable users please see <a target='_blank' href='<?php echo $base_url ?>/admin/users'>Users Administration</a>";
             } else {
                 count = count + 1;
-                var markup = "<tr><td><input type='checkbox' name='deleted["+count.toString()+"]' /><td>"+count.toString()+"</td><td><input type='text' name='users["+count.toString()+"]' value='"+email+"' /></td><td><select id='department' name='departments["+count.toString()+"]'><?php echo $department_selection_basic ?></select></td></tr>";
+                var markup = "<tr><td><input type='checkbox' name='deleted["+count.toString()+"]' /><td>"+count.toString()+"</td><td><input type='text' name='users["+count.toString()+"]' value='"+email+"' /></td><td><select id='program' name='programs["+count.toString()+"]'><?php echo $program_selection_basic ?></select></td></tr>";
                 $("table tbody").append(markup);
             }
           });
@@ -206,27 +206,27 @@ if(isset($_POST["users"])) {
                       </a>
                   </li>
                     <li>
-                        <a href="departments.php">
+                        <a href="programs.php">
                             <i class="ti-view-list-alt"></i>
-                            <p>Departments</p>
+                            <p>Programs</p>
                         </a>
                     </li>
                     <li>
-                        <a href="goals.php">
+                        <a href="metrics.php">
                             <i class="ti-view-list-alt"></i>
-                            <p>Goals</p>
+                            <p>Metrics</p>
                         </a>
                     </li>
                     <li>
                         <a href="data.php">
                             <i class="ti-check-box"></i>
-                            <p>Manage and Approve</p>
+                            <p>Approve Data</p>
                         </a>
                     </li>
                     <li>
-                        <a href="narratives.php">
+                        <a href="methods.php">
                             <i class="ti-view-list-alt"></i>
-                            <p>Narratives</p>
+                            <p>Methodology</p>
                         </a>
                     </li>
                     <li>
@@ -304,36 +304,36 @@ if(isset($_POST["users"])) {
                                             <th>Remove</th>
                                             <th>User ID</th>
                                             <th>User</th>
-                                            <th>Department</th>
-                                            <th>Is Department Admin?</th>
+                                            <th>Program</th>
+                                            <th>Is Program Admin?</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                       <?php
                                       $ch = curl_init();
-                                      $url = $users_db.'?$order=userid%20asc&$where=isdeleted='."'false'";
+                                      $url = $users_db.'?$order=id%20asc&$where=isdeleted='."'false'";
                                         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                                         curl_setopt($ch, CURLOPT_URL, $url);
                                         $r = curl_exec($ch);
                                         $data = json_decode($r, true);
                                         $tbody = "";
                                         $max = count($data);
-                                        $department_lookup = array();
+                                        $program_lookup = array();
                                         for ($i = 0; $i < $max; $i++) {
-                                          $department_selection = "";
-                                          foreach($departments as $department) {
-                                            array_push($department_lookup, array($department["departmentid"]=>$department["department"]));
-                                            if($department["departmentid"] == $data[$i]["departmentid"]) {
-                                              $department_selection.="<option selected value='".$department["departmentid"]."'>".$department["department"]."</option>";
+                                          $program_selection = "";
+                                          foreach($programs as $program) {
+                                            array_push($program_lookup, array($program["id"]=>$program["program"]));
+                                            if($program["id"] == $data[$i]["programid"]) {
+                                              $program_selection.="<option selected value='".$program["id"]."'>".$program["program"]."</option>";
                                             } else {
-                                              $department_selection.="<option value='".$department["departmentid"]."'>".$department["department"]."</option>";
+                                              $program_selection.="<option value='".$program["id"]."'>".$program["program"]."</option>";
                                             }
                                           }
-                                          $dept = "<select id='department' name='departments[".$data[$i]["userid"]."]'>";
-                                          if($data[$i]["isdeptadmin"] == "true") {
-                                            $tbody.="<tr><td><input name='delete[".$data[$i]["userid"]."]' type='checkbox' /></td><td>".$data[$i]["userid"]."</td><td><input name='users[".$data[$i]["userid"]."]' type='text' value='".$data[$i]["email"]."' /></td><td>".$dept.$department_selection."</select></td><td><input type='checkbox' name='isAdmin[".$data[$i]["userid"]."]' checked /></td></tr>";
+                                          $dept = "<select id='program' name='programs[".$data[$i]["id"]."]'>";
+                                          if($data[$i]["isadmin"] == "true") {
+                                            $tbody.="<tr><td><input name='delete[".$data[$i]["id"]."]' type='checkbox' /></td><td>".$data[$i]["id"]."</td><td><input name='users[".$data[$i]["id"]."]' type='text' value='".$data[$i]["email"]."' /></td><td>".$dept.$program_selection."</select></td><td><input type='checkbox' name='isAdmin[".$data[$i]["id"]."]' checked /></td></tr>";
                                           } else {
-                                            $tbody.="<tr><td><input name='delete[".$data[$i]["userid"]."]' type='checkbox' /></td><td>".$data[$i]["userid"]."</td><td><input name='users[".$data[$i]["userid"]."]' type='text' value='".$data[$i]["email"]."' /></td><td>".$dept.$department_selection."</select></td><td><input type='checkbox' name='isAdmin[".$data[$i]["userid"]."]' /></td></tr>";
+                                            $tbody.="<tr><td><input name='delete[".$data[$i]["id"]."]' type='checkbox' /></td><td>".$data[$i]["id"]."</td><td><input name='users[".$data[$i]["id"]."]' type='text' value='".$data[$i]["email"]."' /></td><td>".$dept.$program_selection."</select></td><td><input type='checkbox' name='isAdmin[".$data[$i]["id"]."]' /></td></tr>";
                                           }
                                         }
                                         echo $tbody;
@@ -346,33 +346,33 @@ if(isset($_POST["users"])) {
                                         <th>Add Back</th>
                                         <th>User ID</th>
                                         <th>User</th>
-                                        <th>Department</th>
+                                        <th>Program</th>
                                     </tr>
                                   </thead>
                                   <tbody>
                                     <?php
                                     $ch = curl_init();
-                                    $url = $users_db.'?$order=userid%20asc&$where=isdeleted='."'true'";
+                                    $url = $users_db.'?$order=id%20asc&$where=isdeleted='."'true'";
 
                                       curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                                       curl_setopt($ch, CURLOPT_URL, $url);
                                       $r = curl_exec($ch);
                                       $data = json_decode($r, true);
                                       $tbody = "";
-                                      $department_lookup = array();
+                                      $program_lookup = array();
                                       $max = count($data);
                                       for ($i = 0; $i < $max; $i++) {
-                                        $department_selection = "";
-                                        foreach($departments as $department) {
-                                          array_push($department_lookup, array($department["departmentid"]=>$department["department"]));
-                                          if($department["departmentid"] == $data[$i]["departmentid"]) {
-                                            $department_selection.="<option selected value='".$department["departmentid"]."'>".$department["department"]."</option>";
+                                        $program_selection = "";
+                                        foreach($programs as $program) {
+                                          array_push($program_lookup, array($program["id"]=>$program["program"]));
+                                          if($program["id"] == $data[$i]["programid"]) {
+                                            $program_selection.="<option selected value='".$program["id"]."'>".$program["program"]."</option>";
                                           } else {
-                                            $department_selection.="<option value='".$department["departmentid"]."'>".$department["department"]."</option>";
+                                            $program_selection.="<option value='".$program["id"]."'>".$program["program"]."</option>";
                                           }
                                         }
-                                        $dept = "<select id='department' name='departments[".$data[$i]["userid"]."]'>";
-                                        $tbody.="<tr><td><input name='delete[".$data[$i]["userid"]."]' type='hidden' /><input name='add[".$data[$i]["userid"]."]' type='checkbox' /></td><td>".$data[$i]["userid"]."</td><td><input name='users[".$data[$i]["userid"]."]' type='text' value='".$data[$i]["email"]."' /></td><td>".$dept.$department_selection."</select></td></tr>";
+                                        $dept = "<select id='program' name='programs[".$data[$i]["id"]."]'>";
+                                        $tbody.="<tr><td><input name='delete[".$data[$i]["id"]."]' type='hidden' /><input name='add[".$data[$i]["id"]."]' type='checkbox' /></td><td>".$data[$i]["id"]."</td><td><input name='users[".$data[$i]["id"]."]' type='text' value='".$data[$i]["email"]."' /></td><td>".$dept.$program_selection."</select></td></tr>";
                                       }
                                       echo $tbody;
 

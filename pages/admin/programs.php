@@ -11,6 +11,7 @@ if(isset($_POST["program"])) {
   $d = $_POST["program"];
   $deleted = $_POST["delete"];
   $added = $_POST["add"];
+  $updated = $_POST["changed"];
   $del_ids = array();
   foreach($deleted as $td => $dept) {
     array_push($del_ids, $td);
@@ -20,11 +21,13 @@ if(isset($_POST["program"])) {
     array_push($add_ids, $ta);
   }
   foreach($d as $k => $v) {
-    $update = date("c");
-    if(in_array($k, $del_ids) && !in_array($k, $add_ids)) {
-      array_push($data, array("id"=>$k, "program"=>$v, "updated"=>$update,"isdeleted"=>"true"));
-    } else {
-      array_push($data, array("id"=>$k, "program"=>$v, "updated"=>$update,"isdeleted"=>"false"));
+    if($updated[$k]) {
+      $update = date("c");
+      if(in_array($k, $del_ids) && !in_array($k, $add_ids)) {
+        array_push($data, array("id"=>$k, "program"=>$v, "updated"=>$update,"isdeleted"=>"true"));
+      } else {
+        array_push($data, array("id"=>$k, "program"=>$v, "updated"=>$update,"isdeleted"=>"false"));
+      }
     }
   }
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -73,7 +76,7 @@ if(isset($_POST["program"])) {
     $(document).ready(function(){
         $(".add-row").click(function(){
           $.getJSON('<?php echo $programs_db ?>?$select=max(id)', function(data){
-            var name = $("#program").val();
+            var name = $("#newprogram").val();
             var current_id = parseInt(data[0]["max_id"]) + 1;
             var markup = "<tr><td><input name='delete["+current_id.toString()+"]' type='checkbox' /><td>"+current_id.toString()+"</td><td><input name=program["+current_id.toString()+"] type='text' value='"+name+"' /></td></tr>";
             $("table tbody").append(markup);
@@ -93,6 +96,16 @@ if(isset($_POST["program"])) {
           $("#see_current").toggle();
           $("#see_removed").toggle();
         });
+
+        window.addEventListener('input', function (e) {
+          if(e.target.id === "program") {
+            var i = e.target.name;
+            var s = i.split("[")[1];
+            s = s.replace("]","");
+            var id = "changed["+s+"]";
+            document.getElementById(id).checked = true;
+          }
+        }, false);
       });
       </script>
       <style>
@@ -201,7 +214,7 @@ if(isset($_POST["program"])) {
                         <div class="card">
                           <div class="content">
                             <form>
-                                <input type="text" id="program" placeholder="Program">
+                                <input type="text" id="newprogram" placeholder="Program">
                                 <input type="button" class="add-row" value="Add Program">
                             </form>
                           </div>
@@ -245,7 +258,7 @@ if(isset($_POST["program"])) {
                                       $data = json_decode($r, true);
                                       $tbody = "";
                                       for ($i = 0; $i < count($data); $i++) {
-                                        $tbody.="<tr><td><input name='delete[".$data[$i]["id"]."]' type='checkbox' /></td><td>".$data[$i]["id"]."</td><td><input name='program[".$data[$i]["id"]."]' type='text' value='".$data[$i]["program"]."' /></td></tr>";
+                                        $tbody.="<tr><td><input name='delete[".$data[$i]["id"]."]' type='checkbox' /></td><td>".$data[$i]["id"]."</td><td><input id='program' name='program[".$data[$i]["id"]."]' type='text' value='".$data[$i]["program"]."' /><input type='checkbox' style='visibility:hidden' id='changed[".$data[$i]["id"]."]' name='changed[".$data[$i]["id"]."]' /></td></tr>";
                                       }
                                       echo $tbody;
                                       }

@@ -140,6 +140,16 @@ if(count($data) > 0) {
                 $("table tbody").append(markup);
             }
           });
+
+          window.addEventListener('input', function (e) {
+            if(e.target.id === "program") {
+              var i = e.target.name;
+              var s = i.split("[")[1];
+              s = s.replace("]","");
+              var id = "changed["+s+"]";
+              document.getElementById(id).checked = true;
+            }
+          }, false);
         });
         </script>
   </head>

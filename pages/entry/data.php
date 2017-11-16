@@ -25,21 +25,24 @@
     if(isset($_POST["metric"])) {
       $g = $_POST["metric"];
       $fy = $_POST["fiscal_year"];
+      $updated = $_POST["changed"];
       $data = array();
       foreach($g as $kk => $vv) {
         $d = $_POST[$kk];
         foreach($d as $k => $v) {
-          $update = date("c");
-          $id = $kk."-".$k."-".$fy;
-          $metric_id = $kk;
-          $metric_title = $vv;
-          $program = $prog_mapping[$kk];
-          $period = $k;
-          $fiscal_year = $fy;
-          $date_key = 'quarter'.$k;
-          $date = $settings[0][$date_key]."/".$fy;
-          $value = str_replace("undefined","",$v);
-          array_push($data, array("id"=>$id, "metric_id"=>$metric_id, "metric_title"=>$metric_title, "program"=> $program, "period" => $period, "fiscal_year" => $fiscal_year, "date" => $date, "value" => $value, "updated"=>$update));
+          if($updated[$kk]) {
+            $update = date("c");
+            $id = $kk."-".$k."-".$fy;
+            $metric_id = $kk;
+            $metric_title = $vv;
+            $program = $prog_mapping[$kk];
+            $period = $k;
+            $fiscal_year = $fy;
+            $date_key = 'quarter'.$k;
+            $date = $settings[0][$date_key]."/".$fy;
+            $value = str_replace("undefined","",$v);
+            array_push($data, array("id"=>$id, "metric_id"=>$metric_id, "metric_title"=>$metric_title, "program"=> $program, "period" => $period, "fiscal_year" => $fiscal_year, "date" => $date, "value" => $value, "updated"=>$update));
+            }
           }
       }
 
@@ -128,27 +131,36 @@
       var table = "";
       for(key in data_for_table) {
         table += "<tr>";
-        table += "<td>" + key + "</td>";
-        table += "<td><input type='text' name='metric["+key+"]' autocomplete='off' value='" + data_for_table[key]["title"] + "' /></td>";
+        table += "<td>" + key + "<input type='checkbox' id='changed[" + key +"]' style='visibility:hidden' name='changed["+key+"]' /></td>";
+        table += "<td><input id='metric' type='text' name='metric["+key+"]' autocomplete='off' value='" + data_for_table[key]["title"] + "' /></td>";
         table += "<td>"+ data_for_table[key]["target"]+"</td>";
         if("data" in data_for_table[key]) {
           for(year in data_for_table[key]["data"]) {
             if(year == 2017) {
-              table += "<td><input name='"+key+"[1]' type='text' value="+ ((data_for_table[key]["data"][year]["quarter1"] !== undefined) ? data_for_table[key]["data"][year]["quarter1"] : "''") +" /></td>";
-              table += "<td><input name='"+key+"[2]' type='text' value="+ ((data_for_table[key]["data"][year]["quarter2"] !== undefined) ? data_for_table[key]["data"][year]["quarter2"] : "''")+" /></td>";
-              table += "<td><input name='"+key+"[3]' type='text' value="+ ((data_for_table[key]["data"][year]["quarter3"] !== undefined) ? data_for_table[key]["data"][year]["quarter3"] : "''")+" /></td>";
-              table += "<td><input name='"+key+"[4]' type='text' value="+ ((data_for_table[key]["data"][year]["quarter4"] !== undefined) ? data_for_table[key]["data"][year]["quarter4"] : "''")+" /></td>";
+              table += "<td><input id='data' name='"+key+"[1]' type='text' value="+ ((data_for_table[key]["data"][year]["quarter1"] !== undefined) ? data_for_table[key]["data"][year]["quarter1"] : "''") +" /></td>";
+              table += "<td><input id='data' name='"+key+"[2]' type='text' value="+ ((data_for_table[key]["data"][year]["quarter2"] !== undefined) ? data_for_table[key]["data"][year]["quarter2"] : "''")+" /></td>";
+              table += "<td><input id='data' name='"+key+"[3]' type='text' value="+ ((data_for_table[key]["data"][year]["quarter3"] !== undefined) ? data_for_table[key]["data"][year]["quarter3"] : "''")+" /></td>";
+              table += "<td><input id='data' name='"+key+"[4]' type='text' value="+ ((data_for_table[key]["data"][year]["quarter4"] !== undefined) ? data_for_table[key]["data"][year]["quarter4"] : "''")+" /></td>";
             }
           }
         } else {
-          table += "<td><input name='"+key+"[1]' type='text' value='' /></td>";
-          table += "<td><input name='"+key+"[2]' type='text' value='' /></td>";
-          table += "<td><input name='"+key+"[3]' type='text' value='' /></td>";
-          table += "<td><input name='"+key+"[4]' type='text' value='' /></td>";
+          table += "<td><input id='data' name='"+key+"[1]' type='text' value='' /></td>";
+          table += "<td><input id='data' name='"+key+"[2]' type='text' value='' /></td>";
+          table += "<td><input id='data' name='"+key+"[3]' type='text' value='' /></td>";
+          table += "<td><input id='data' name='"+key+"[4]' type='text' value='' /></td>";
         }
         table += "</tr>";
       }
       document.getElementById("tb").innerHTML = table;
+
+      window.addEventListener('input', function (e) {
+        if(e.target.id === "data") {
+          var i = e.target.name;
+          var s = i.split("[")[0];
+          var id = "changed["+s+"]";
+          document.getElementById(id).checked = true;
+        }
+      }, false);
     });
     </script>
 

@@ -1,9 +1,21 @@
 <?php
+include("pages/superadmin/settings.php");
 $code=$_GET["code"];
 $s=getenv("client_id");
 $url="https://peter.demo.socrata.com/oauth/access_token?client_id=M45QwgboTFjF2aPVUUfYs5mtt&client_secret=".$s."&grant_type=authorization_code&redirect_uri=https://performance-ingress.herokuapp.com/success.php&code=".$code;
 
-
+# Get Users
+$ch = curl_init();
+$url = $users_db.'?$order=userid%20asc&$where=isdeleted='."'false'";
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_URL, $url);
+$r = curl_exec($ch);
+$users = json_decode($r, true);
+$users_mapping = array();
+$total = count($users);
+for($i = 0; $i < $total; $i ++) {
+  $users_mapping[$users[$i]["email"]] = array("isDeptAdmin" => $users[$i]["isDeptAdmin"], "department" => $users[$i]["departmentid"]);
+}
 function getAccessCode($u) {
   $c = curl_init();
   echo "<script>console.log(`".$u."`)</script>";
@@ -46,7 +58,20 @@ function getUserInfo($u, $a) {
 }
 $user = "https://peter.demo.socrata.com/users/current.json";
 $info = getUserInfo($user, $access_token);
+$email = $info["email"];
+setcookie("user",$email,time() + 3600);
 if($info["roleName"] === "administrator") {
   header("Location: pages/admin/settings.php");
+} else {
+  if(in_array($email, $user_mapping)){
+    setcookie("department", $user_mapping[$email]["department"], time() + 3600);
+    if($user_mapping[$email]["isDeptAdmin"] === "true") {
+      header("Location: pages/departments/users.php");
+    } else {
+      header("Location: pages/entry/dataentry.php");
+    }
+  } else {
+    echo "<h1>Please request access from administrator</h1>";
+  }
 }
 ?>

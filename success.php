@@ -73,6 +73,7 @@ if($info["roleName"] === "administrator") {
       header("Location: pages/entry/dataentry.php");
     }
   } else {
+    echo $email;
     echo "<h1>Please request access from administrator</h1>";
   }
 }

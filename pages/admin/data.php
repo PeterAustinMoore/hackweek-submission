@@ -9,7 +9,7 @@
     $result = curl_exec($ch);
     $settings=json_decode($result, true);
 
-    if(isset($_SERVER['QUERY_STRING'])) {
+    if($_SERVER['QUERY_STRING']) {
       $g_id_str = $_SERVER['QUERY_STRING'];
       #TODO: Sanitize this
       $g_id = explode("=", $g_id_str);

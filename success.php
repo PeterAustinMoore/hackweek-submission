@@ -47,6 +47,6 @@ function getUserInfo($u, $a) {
 $user = "https://peter.demo.socrata.com/users/current.json";
 $info = getUserInfo($user, $access_token);
 if($info["roleName"] === "administrator") {
-  header("pages/admin/settings.php");
+  header("Location: pages/admin/settings.php");
 }
 ?>

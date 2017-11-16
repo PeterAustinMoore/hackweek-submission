@@ -44,7 +44,7 @@ function getAccessCode($u) {
 #  $access_token = $_COOKIE["access_token"];
 #}
 $access_token = getAccessCode($url);
-setcookie("access_token", $access_token, time()+3600);
+setcookie("access_token", $access_token, time()+3600, "/");
 
 function getUserInfo($u, $a) {
   $c = curl_init();
@@ -61,7 +61,7 @@ function getUserInfo($u, $a) {
 $user = "https://peter.demo.socrata.com/users/current.json";
 $info = getUserInfo($user, $access_token);
 $email = $info["email"];
-setcookie("user",$email,time() + 3600);
+setcookie("user",$email,time() + 3600, "/");
 if($info["roleName"] === "administrator") {
   header("Location: pages/admin/settings.php");
 } else {

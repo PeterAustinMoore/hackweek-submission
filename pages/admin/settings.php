@@ -2,16 +2,37 @@
     $username = getenv("username");
     $password = getenv("password");
 
+    function valid($d) {
+      foreach($d as $k => $v) {
+        preg_match("/^[0-9]{2}\/[0-9]{2}/", $v, $m);
+        if(!$m) {
+          return array(false, "Invalid date format: ".$v.". Must be in MM/DD format.");
+        }
+        $split = explode("/", $v);
+        if((int)$split[0] > 12) {
+          return array(false, "Invalid Month: ".$split[0]);
+        }
+        if((int)$split[1] > 31) {
+          return array(false, "Invalid Day: ".$split[1]);
+        }
+      }
+      return array(true, "");
+    }
     $ch = curl_init();
     if(isset($_POST["save"])) {
       $data = array("quarter1" => $_POST["quarter1"], "quarter2" => $_POST["quarter2"], "quarter3" => $_POST["quarter3"], "quarter4" => $_POST["quarter4"]);
-      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-      curl_setopt($ch, CURLOPT_URL, $settings_db);
-      curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
-      curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
-      curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-      curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-      curl_exec($ch);
+      $valid = valid($data);
+      if($valid[0]) {
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_URL, $settings_db);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+        curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+        curl_exec($ch);
+      } else {
+        echo "<script>alert('".$valid[1]."')</script>";
+      }
     }
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -60,14 +81,13 @@
       var table = "";
       var data = settings_data[0];
       table += '<tr>';
-      table += '<td><input name="quarter1" type="text" value ="' + data["quarter1"] + '"/></td>';
-      table += '<td><input name="quarter2" type="text" value ="' + data["quarter2"] + '"/></td>'
-      table += '<td><input name="quarter3" type="text" value ="' + data["quarter3"] + '"/></td>'
-      table += '<td><input name="quarter4" type="text" value ="' + data["quarter4"] + '"/></td>'
+      table += '<td><input autocomplete="off" name="quarter1" type="text" value ="' + data["quarter1"] + '"/></td>';
+      table += '<td><input autocomplete="off" name="quarter2" type="text" value ="' + data["quarter2"] + '"/></td>'
+      table += '<td><input autocomplete="off" name="quarter3" type="text" value ="' + data["quarter3"] + '"/></td>'
+      table += '<td><input autocomplete="off" name="quarter4" type="text" value ="' + data["quarter4"] + '"/></td>'
       table += '</tr>'
 
       document.getElementById("tb").innerHTML = table;
-
     });
     </script>
 </head>

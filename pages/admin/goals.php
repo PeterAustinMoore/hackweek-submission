@@ -14,6 +14,9 @@
     if(isset($_POST["goal"])) {
       $data = array();
       $g = $_POST["goal"];
+      $u = $_POST["unit"];
+      $t = $_POST["timeframe"];
+      $dept = $_POST["department"];
       $editable = $_POST["DeptCanEdit"];
       $editable_ids = array();
       foreach($editable as $te => $dept) {
@@ -22,9 +25,9 @@
       foreach($g as $k => $v) {
         $update = date("c");
         if(in_array($k, $editable_ids)) {
-          array_push($data, array("id"=>$k, "goal_title"=>$v, "deptcanedit"=>"true", "updated"=>$update));
+          array_push($data, array("id"=>$k, "goal_title"=>$v, "timeframe" => $t[$k], "department" => $dept[$k], "deptcanedit"=>"true", "updated"=>$update));
         } else {
-          array_push($data, array("id"=>$k, "goal_title"=>$v, "deptcanedit"=>"false", "updated"=>$update));
+          array_push($data, array("id"=>$k, "goal_title"=>$v, "timeframe" => $t[$k], "department" => $dept[$k], "deptcanedit"=>"false", "updated"=>$update));
         }
       }
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -52,6 +55,7 @@
     curl_setopt($ch, CURLOPT_URL, $goal_db);
     $result = curl_exec($ch);
     $goals=json_decode($result, true);
+    $goal_count = count($goals);
   ?>
   <html>
   <head>
@@ -89,6 +93,7 @@
       <script src="../../assets/js/getgoals.js"></script>
       <script type="text/javascript">
       $(document).ready(function(){
+        var timeframe = ["quarterly", "annual", "monthly"];
         var data = <?php echo json_encode($goals); ?>;
         var departments = <?php echo $departments ?>;
         var dept_mapping = {};
@@ -100,7 +105,25 @@
           table += "<tr>";
           table += "<td>" + data[d]["id"] + "</td>";
           table += "<td><input type='text' name='goal["+data[d]["id"]+"]' value='" + data[d]["goal_title"] + "' /></td>";
-          table += "<td>" + dept_mapping[data[d]["department"]] + "</td>";
+          table += "<td><select name='department["+data[d]["id"]+"]'>";
+          for(dd in dept_mapping){
+            if(dd == data[d]["department"]) {
+              table += "<option selected value=" + data[d]["department"] + ">" + dept_mapping[data[d]["department"]] + "</option>";
+            } else {
+              table += "<option value=" + dd + ">" + dept_mapping[dd] + "</option>";
+            }
+          }
+          table += "<td><select name='timeframe["+data[d]["id"]+"]'>"
+          for(t in timeframe) {
+            if(data[d]["timeframe"] === timeframe[t]) {
+              table += "<option selected value='"+ timeframe[t] + "'>" + timeframe[t] + "</option>";
+            } else {
+              table += "<option value='"+ timeframe[t] + "'>" + timeframe[t] + "</option>";
+            }
+          }
+          table += "</select></td>";
+          table += "<td>" + data[d]["category"] + "</td>";
+          table += "<td><input type='text' name='unit["+data[d]["id"]+"]' value='" + data[d]["unit"] + "' /></td>";
           if(data[d]["deptcanedit"] == "true"){
             table += "<td><input type='checkbox' name='DeptCanEdit["+data[d]["id"]+"]' checked /></td>";
           } else {
@@ -110,6 +133,34 @@
           table += "</tr>";
         }
         document.getElementById("tb").innerHTML = table;
+
+
+        var current_goal_count = <?php echo (int)$goal_count + 1 ?>;
+
+        // New Goal Layout
+        var newGoal = current_goal_count + "  ";
+        newGoal += "<input type='text' id='newName' value='' placeholder='Goal Title' />"
+        newGoal += "<select id='newDept'>"
+        for(dd in dept_mapping) {
+          newGoal += "<option value=" + dd + ">"+ dept_mapping[dd]+"</option>";
+        }
+        newGoal += "</select><select id='newTimeframe'>";
+        for(t in timeframe) {
+          newGoal += "<option value='"+ timeframe[t]+"'>"+timeframe[t]+"</option>";
+        }
+        newGoal += "</select>";
+        newGoal += "<input id ='newUnit' type='text' placeholder='Unit' value='' />"
+        document.getElementById("newGoal").innerHTML = newGoal;
+
+        // Create New Goal
+        $("#newGoalButton").click(function(e) {
+          e.preventDefault();
+          var newName = $("#newName").val();
+          var newDept = $("#newDept").val();
+          var newTimeframe = $("#newTimeframe").val();
+          var newUnit = $("#newUnit").val();
+          //$("table tbody").append(markup);
+        });
       });
       </script>
   </head>
@@ -220,11 +271,8 @@
                         <div class="col-md-12">
                             <div class="card">
                               <div class="content">
-                                <input type="text" value="" />
-                                <select name="newGoalDept">
-                                  <option value="department">Department</option>
-                                </select>
-                                <input type="submit" value="Create Goal" />
+                                <div id="newGoal"></div>
+                                <input id="newGoalButton" type="submit" value="Create Goal" />
                               </div>
                             </div>
                           </div>
@@ -248,6 +296,9 @@
                                         <th>Goal ID</th>
                                         <th>Goal Name</th>
                                         <th>Department</th>
+                                        <th>Timeframe</th>
+                                        <th>Category</th>
+                                        <th>Unit</th>
                                         <th>Departments Can Edit</th>
                                         <th></th>
                                       </thead>

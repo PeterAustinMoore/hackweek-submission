@@ -131,7 +131,7 @@ if(isset($_POST["users"])) {
           $(".add-row").click(function(){
             var email = $("#email").val();
             if($.inArray(email, email_list) === -1) {
-              document.getElementById("errors").innerHTML = "Email address not list of acceptable users please see <a target='_blank' href='<?php echo $base_url ?>/admin/users'>Users Administration</a>";
+              document.getElementById("errors").innerHTML = "Please see <a target='_blank' href='<?php echo $base_url ?>/admin/users'>User Administration Pannel</a> to add this user";
             } else {
                 count = count + 1;
                 var markup = "<tr><td><input type='checkbox' name='deleted["+count.toString()+"]' /><td>"+count.toString()+"</td><td><input type='text' name='users["+count.toString()+"]' value='"+email+"' /></td><td><select id='program' name='programs["+count.toString()+"]'><?php echo $program_selection_basic ?></select></td></tr>";

@@ -188,7 +188,7 @@
       transition: opacity 0.6s;
       width:100%;
       z-index: 100;
-      float:right;
+      right:0;
       width:150px;
       position:absolute;
     }

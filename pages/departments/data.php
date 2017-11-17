@@ -1,98 +1,3 @@
-<?php include("../superadmin/settings.php");
-    $username = getenv("username");
-    $password = getenv("password");
-
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
-    curl_setopt($ch, CURLOPT_URL, $metric_db);
-    $result = curl_exec($ch);
-    $metrics=json_decode($result, true);
-
-    $ch = curl_init();
-    $url = $metric_db.'?$where=canedit='."'true'";
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
-    $result = curl_exec($ch);
-    $data = json_decode($result, true);
-    if(count($data) > 0) {
-      $CanEdit = true;
-    } else {
-      $CanEdit = false;
-    }
-
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
-    curl_setopt($ch, CURLOPT_URL, $settings_db);
-    $result = curl_exec($ch);
-    $settings=json_decode($result, true);
-
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
-    curl_setopt($ch, CURLOPT_URL, $metric_db);
-    $result = curl_exec($ch);
-    $metrics=json_decode($result, true);
-
-    $c = count($metrics);
-    $prog_mapping = array();
-    for($i = 0; $i < $c; $i ++) {
-      $prog_mapping[$metrics[$i]["id"]] = $metrics[$i]["program"];
-    }
-
-    if(isset($_POST["metric"])) {
-      $g = $_POST["metric"];
-      $fy = $_POST["fiscal_year"];
-      $data = array();
-      foreach($g as $kk => $vv) {
-        $d = $_POST[$kk];
-        foreach($d as $k => $v) {
-          if($v) {
-            $update = date("c");
-            $id = $kk."-".$k."-".$fy;
-            $metric_id = $kk;
-            $metric_title = $vv;
-            $program = $prog_mapping[$kk];
-            $period = $k;
-            $fiscal_year = $fy;
-            $date_key = 'quarter'.$k;
-            $date = $settings[0][$date_key]."/".$fy;
-            $value = str_replace("undefined","",$v);
-            array_push($data, array("id"=>$id, "metric_id"=>$metric_id, "metric_title"=>$metric_title, "program"=> $program, "period" => $period, "fiscal_year" => $fiscal_year, "date" => $date, "value" => $value, "updated"=>$update));
-            }
-          }
-      }
-      # Program Staging Table Update
-      $ch = curl_init();
-      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-      curl_setopt($ch, CURLOPT_URL, $program_data_db);
-      curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-      curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
-      curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-      curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-      curl_exec($ch);
-
-      # Staging Table Update
-      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-      curl_setopt($ch, CURLOPT_URL, $staging_data_db);
-      curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-      curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
-      curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-      curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-
-      $r = curl_exec($ch);
-      $res = json_decode($r, true);
-      if($res["Errors"] == 0) {
-        echo "<script>alert('Data updated successfully!')</script>";
-      }
-    }
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
-    curl_setopt($ch, CURLOPT_URL, $staging_data_db);
-    $result = curl_exec($ch);
-    $prog_data=json_decode($result, true);
-?>
 <html>
 <head>
 <!-- JQUERY BABY -->
@@ -127,6 +32,104 @@
     <link href="http://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet">
     <link href='https://fonts.googleapis.com/css?family=Muli:400,300' rel='stylesheet' type='text/css'>
     <link href="../../assets/css/themify-icons.css" rel="stylesheet">
+
+    <?php include("../superadmin/settings.php");
+        $username = getenv("username");
+        $password = getenv("password");
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
+        curl_setopt($ch, CURLOPT_URL, $metric_db);
+        $result = curl_exec($ch);
+        $metrics=json_decode($result, true);
+
+        $ch = curl_init();
+        $url = $metric_db.'?$where=canedit='."'true'";
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
+        $result = curl_exec($ch);
+        $data = json_decode($result, true);
+        if(count($data) > 0) {
+          $CanEdit = true;
+        } else {
+          $CanEdit = false;
+        }
+
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
+        curl_setopt($ch, CURLOPT_URL, $settings_db);
+        $result = curl_exec($ch);
+        $settings=json_decode($result, true);
+
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
+        curl_setopt($ch, CURLOPT_URL, $metric_db);
+        $result = curl_exec($ch);
+        $metrics=json_decode($result, true);
+
+        $c = count($metrics);
+        $prog_mapping = array();
+        for($i = 0; $i < $c; $i ++) {
+          $prog_mapping[$metrics[$i]["id"]] = $metrics[$i]["program"];
+        }
+
+        if(isset($_POST["metric"])) {
+          $g = $_POST["metric"];
+          $fy = $_POST["fiscal_year"];
+          $data = array();
+          foreach($g as $kk => $vv) {
+            $d = $_POST[$kk];
+            foreach($d as $k => $v) {
+              if($v) {
+                $update = date("c");
+                $id = $kk."-".$k."-".$fy;
+                $metric_id = $kk;
+                $metric_title = $vv;
+                $program = $prog_mapping[$kk];
+                $period = $k;
+                $fiscal_year = $fy;
+                $date_key = 'quarter'.$k;
+                $date = $settings[0][$date_key]."/".$fy;
+                $value = str_replace("undefined","",$v);
+                array_push($data, array("id"=>$id, "metric_id"=>$metric_id, "metric_title"=>$metric_title, "program"=> $program, "period" => $period, "fiscal_year" => $fiscal_year, "date" => $date, "value" => $value, "updated"=>$update));
+                }
+              }
+          }
+          # Program Staging Table Update
+          $ch = curl_init();
+          curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+          curl_setopt($ch, CURLOPT_URL, $program_data_db);
+          curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+          curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
+          curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+          curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+          curl_exec($ch);
+
+          # Staging Table Update
+          curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+          curl_setopt($ch, CURLOPT_URL, $staging_data_db);
+          curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+          curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
+          curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+          curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+
+          $r = curl_exec($ch);
+          $res = json_decode($r, true);
+          if($res["Errors"] == 0) {
+            echo '<script>$(document).ready(function() {var div = document.getElementById("alerter");
+                  div.style.opacity = "1";
+                  setTimeout(function(){ div.style.opacity = "0"; }, 3000); });</script>';
+          }
+        }
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
+        curl_setopt($ch, CURLOPT_URL, $staging_data_db);
+        $result = curl_exec($ch);
+        $prog_data=json_decode($result, true);
+    ?>
     <script>
     $(document).ready(function(){
       var metrics = <?php echo json_encode($metrics); ?>;
@@ -187,6 +190,19 @@
     input[type="text"] {
       width:100%;
     }
+    .alert {
+      background-color: #f44336;
+      color: white;
+      opacity: 0;
+      transition: opacity 0.6s;
+      width:100%;
+      z-index: 100;
+      right:0;
+      width:150px;
+      position:absolute;
+    }
+
+    .alert.success {background-color: #4CAF50;}
     </style>
 </head>
 <body>
@@ -239,6 +255,9 @@
       </div>
 
     <div class="main-panel">
+      <div class="alert success" id="alerter">
+          Approved
+      </div>
     <nav class="navbar navbar-default">
             <div class="container-fluid">
                 <div class="navbar-header">

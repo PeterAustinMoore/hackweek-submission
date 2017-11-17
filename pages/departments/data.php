@@ -175,6 +175,18 @@
         table += "</tr>";
       }
       document.getElementById("tb").innerHTML = table;
+
+      $("#reject").click(function(e){
+        e.preventDefault();
+        document.getElementById("rejectionNote").style.display = "block";
+      });
+      $("#rejection").submit(function(e) {
+        e.preventDefault();
+        document.getElementById("rejectionNote").style.display = "none";
+        var div = document.getElementById("rejected");
+              div.style.opacity = "1";
+              setTimeout(function(){ div.style.opacity = "0"; }, 3000);
+      });
     });
     </script>
     <style>
@@ -191,7 +203,6 @@
       width:100%;
     }
     .alert {
-      background-color: #f44336;
       color: white;
       opacity: 0;
       transition: opacity 0.6s;
@@ -203,6 +214,20 @@
     }
 
     .alert.success {background-color: #4CAF50;}
+    .alert.reject {background-color: #f44336;}
+
+    #rejectionNote {
+      display:none;
+      background: white;
+      opacity: 1;
+      transition: opacity 0.6s;
+      width:50%;
+      z-index: 100;
+      left:10%;
+      top:15%;
+      padding:80px;
+      position:absolute;
+    }
     </style>
 </head>
 <body>
@@ -258,6 +283,16 @@
       <div class="alert success" id="alerter">
           Approved
       </div>
+      <div class="alert reject" id="rejected">
+          Rejected
+      </div>
+      <div id="rejectionNote">
+        <form id="rejection">
+          <h4>Reason for rejection</h4>
+          <textarea name='rejected' rows='7' cols='50'></textarea>
+          <input type="submit" />
+        </form>
+      </div>
     <nav class="navbar navbar-default">
             <div class="container-fluid">
                 <div class="navbar-header">
@@ -285,7 +320,7 @@
                         <div class="col-md-12">
                             <div class="card">
                               <div class="content">
-                                <input type="submit" name="reject" value="Reject with note" />
+                                <input type="submit" id="reject" name="reject" value="Reject with note" />
                                 <input type="submit" name="approve" value="Approve" />
                               </div>
                             </div>

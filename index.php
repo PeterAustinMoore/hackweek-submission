@@ -24,13 +24,10 @@ html, body {
   color:white;
   text-align: center;
   line-height: 150px;
-
-  -moz-border-radius: 200px / 70px;
-  -webkit-border-radius: 200px / 70px;
-  border-radius: 200px / 70px;
+  font-size: 20px;
 }
 .b:hover{
-  font-size: 20px;
+  font-size: 26px;
 }
 h1 {
   padding-top: 10%;
@@ -44,9 +41,13 @@ h1 {
   margin: 0 auto;
   width: 150px;
 }
+h5 {
+  color:white;
+}
 </style>
 </head>
 <body>
+
 <h1>VIEW SITE AS A...</h1>
 <div id="wrapper">
   <a href="pages/admin/settings.php"><div class="b">PERFORMANCE GURU</div></a>
@@ -54,6 +55,7 @@ h1 {
   <a href="pages/entry/data.php"><div class="b">DATA OWNER/WIZARD</div></a>
 </div>
 <div id="snu"></div>
+<h5>TEAM INGEST THE INGRESS</h5>
 </body>
 </html>
 

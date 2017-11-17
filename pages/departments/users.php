@@ -272,7 +272,7 @@ if(count($data) > 0) {
                                         $data = json_decode($r, true);
                                         $tbody = "";
                                         for ($i = 0; $i < count($data); $i++) {
-                                          $tbody.="<tr><td><input type='checkbox' /></td><td>".$data[$i]["id"]."</td><td><input name='[".$data[$i]["id"]."]' type='text' value='".$data[$i]["email"]."' /></td><td>".$program."</td></tr>";
+                                          $tbody.="<tr><td><input type='checkbox' /></td><td>".$data[$i]["id"]."</td><td><input input data-lpignore='true' style='width:250px' name='[".$data[$i]["id"]."]' type='text' value='".$data[$i]["email"]."' /></td><td>".$program."</td></tr>";
                                         }
                                         echo $tbody;
                                         }

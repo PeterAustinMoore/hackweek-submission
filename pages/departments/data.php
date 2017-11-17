@@ -155,7 +155,7 @@
       for(key in data_for_table) {
         table += "<tr>";
         table += "<td>" + key + "</td>";
-        table += "<td><input type='text' name='metric["+key+"]' autocomplete='off' value='" + data_for_table[key]["title"] + "' /></td>";
+        table += "<td><input input data-lpignore='true' style='width:250px' type='text' name='metric["+key+"]' autocomplete='off' value='" + data_for_table[key]["title"] + "' /></td>";
         table += "<td>"+ data_for_table[key]["target"]+"</td>";
         if("data" in data_for_table[key]) {
           for(year in data_for_table[key]["data"]) {

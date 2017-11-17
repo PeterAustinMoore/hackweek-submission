@@ -154,8 +154,8 @@
         for(key in data_for_table) {
           table += "<tr>";
           table += "<td><input type='checkbox' name='reject["+key+"]' /></td>";
-          table += "<td>" + key + "</td>";
-          table += "<td><input type='text' name='metric["+key+"]' autocomplete='off' value='" + data_for_table[key]["title"] + "' /></td>";
+          table += "<td style='width:15px'>" + key + "</td>";
+          table += "<td><input data-lpignore='true' style='width:250px' type='text' name='metric["+key+"]' autocomplete='off' value='" + data_for_table[key]["title"] + "' /></td>";
           table += "<td>"+ data_for_table[key]["target"]+"</td>";
           if("data" in data_for_table[key]) {
             for(year in data_for_table[key]["data"]) {
@@ -293,7 +293,7 @@
 
 
           <div class="content">
-            <form name="programs" method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
+            <form autocomplete="off" name="programs" method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
               <div class="container-fluid">
                 <div class="row">
                     <div class="col-md-12">

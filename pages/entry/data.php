@@ -69,7 +69,6 @@
           foreach($g as $kk => $vv) {
             $d = $_POST[$kk];
             foreach($d as $k => $v) {
-              if($updated[$kk]) {
                 $update = date("c");
                 $id = $kk."-".$k."-".$fy;
                 $metric_id = $kk;
@@ -81,7 +80,6 @@
                 $date = $settings[0][$date_key]."/".$fy;
                 $value = str_replace("undefined","",$v);
                 array_push($data, array("id"=>$id, "metric_id"=>$metric_id, "metric_title"=>$metric_title, "program"=> $program, "period" => $period, "fiscal_year" => $fiscal_year, "date" => $date, "value" => $value, "updated"=>$update));
-                }
               }
           }
 

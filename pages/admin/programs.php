@@ -1,4 +1,4 @@
-program<?php
+<?php
 include("../superadmin/settings.php");
 
 $ch = curl_init();
@@ -46,8 +46,8 @@ if(isset($_POST["program"])) {
   integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
   crossorigin="anonymous"></script>
   <meta charset="utf-8" />
-  <link rel="apple-touch-icon" sizes="76x76" href="assets/img/apple-icon.png">
-  <link rel="icon" type="image/png" sizes="96x96" href="assets/img/favicon.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="../../assets/img/apple-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="../../assets/img/favicon.png">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 
   <title>Site Administration</title>

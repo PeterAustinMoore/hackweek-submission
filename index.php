@@ -32,6 +32,14 @@ h1 {
   padding-top: 10%;
   color:white;
 }
+#snu {
+  background-image: url("assets/img/classic.png");
+  background-size: 150px 150px;
+  height:150px;
+  background-repeat: no-repeat;
+  margin: 0 auto;
+  width: 150px;
+}
 </style>
 </head>
 <body>
@@ -41,6 +49,7 @@ h1 {
   <a href="pages/departments/data.php"><div class="b">PROGRAM LEADER</div></a>
   <a href="pages/entry/data.php"><div class="b">DATA OWNER/WIZARD</div></a>
 </div>
+<div id="snu"></div>
 </body>
 </html>
 

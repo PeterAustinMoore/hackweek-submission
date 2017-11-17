@@ -174,6 +174,20 @@
       document.getElementById("tb").innerHTML = table;
     });
     </script>
+    <style>
+    #timeframe {
+      height:45px;
+    }
+    .tf {
+      width:33%;
+      height:100%;
+      display: inline-block;
+      text-align: center;
+    }
+    input[type="text"] {
+      width:100%;
+    }
+    </style>
 </head>
 <body>
   <div class="wrapper">

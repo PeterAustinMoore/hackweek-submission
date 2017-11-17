@@ -153,6 +153,7 @@
         var table = "";
         for(key in data_for_table) {
           table += "<tr>";
+          table += "<td><input type='checkbox' name='reject["+key+"]' /></td>";
           table += "<td>" + key + "</td>";
           table += "<td><input type='text' name='metric["+key+"]' autocomplete='off' value='" + data_for_table[key]["title"] + "' /></td>";
           table += "<td>"+ data_for_table[key]["target"]+"</td>";
@@ -177,6 +178,20 @@
         document.getElementById("tb").innerHTML = table;
       });
       </script>
+      <style>
+      #timeframe {
+        height:45px;
+      }
+      .tf {
+        width:33%;
+        height:100%;
+        display: inline-block;
+        text-align: center;
+      }
+      input[type="text"] {
+        width:100%;
+      }
+      </style>
   </head>
   <body>
     <div class="wrapper">
@@ -276,16 +291,27 @@
                       </div>
                     </div>
                   <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                          <div class="content">
+                            <div id='timeframe'>
+                              <a><div class="tf" id="quarter">Quarter</div></a>
+                              <a><div class="tf" id="annual">Annual</div></a>
+                              <a><div class="tf" id="monthly">Monthly</div></a>
+                          </div>
+                        </div>
+                      </div>
                       <div class="col-md-12">
                           <div class="card">
                               <div class="content table-responsive table-full-width">
                                   <table class="table table-striped">
                                       <thead>
                                         <tr>
-                                          <th colspan="3"></th>
+                                          <th colspan="4"></th>
                                           <th colspan="4" style="text-align:center" id="year"><input type="text" name="fiscal_year" readonly value="2017" /></th>
                                         </tr>
                                         <tr>
+                                          <th>Reject Entry</th>
                                           <th>Metric ID</th>
                                           <th>Metric Name</th>
                                           <th>Target</th>

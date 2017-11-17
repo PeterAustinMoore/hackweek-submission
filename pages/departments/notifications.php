@@ -26,11 +26,11 @@ if(isset($_POST["users"])) {
   $deleted = $_POST["delete"];
   $added = $_POST["add"];
   $del_ids = array();
-  foreach($deleted as $td => $dept) {
+  foreach($deleted as $td => $prog) {
     array_push($del_ids, $td);
   }
   $add_ids = array();
-  foreach($added as $ta => $dept_a) {
+  foreach($added as $ta => $prog_a) {
     array_push($add_ids, $ta);
   }
   foreach($u as $k => $v) {
@@ -63,7 +63,7 @@ if(isset($_POST["users"])) {
 }
 
 $ch = curl_init();
-$url = $goal_db.'?$where=canedit='."'true'";
+$url = $metric_db.'?$where=canedit='."'true'";
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_URL, $url);
 curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
@@ -203,8 +203,8 @@ if(count($data) > 0) {
                     <div class="col-md-12">
                       <div class="card">
                         <label><input type="checkbox" name="all" id="all"/>All Activities</label><br>
-                        <label><input type="checkbox" name="goals" id="goals"ondragover=""/>On Goal Name Change</label><br>
-                        <label><input type="checkbox"name="data" id="data" />On Goal Data Change</label><br>
+                        <label><input type="checkbox" name="metrics" id="metrics"ondragover=""/>On Metric Name Change</label><br>
+                        <label><input type="checkbox"name="data" id="data" />On Metric Data Change</label><br>
                       </div>
                     </div>
                   </div>

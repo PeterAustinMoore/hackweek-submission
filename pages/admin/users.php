@@ -281,7 +281,7 @@ if(isset($_POST["users"])) {
                         </div>
                       </div>
                     </div>
-                    <form name="users" method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
+                    <form name="users" method="POST"  autocomplete="off" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
                     <div class="row">
                         <div class="col-md-12">
                             <div class="card">
@@ -331,9 +331,9 @@ if(isset($_POST["users"])) {
                                           }
                                           $dept = "<select id='program' name='programs[".$data[$i]["id"]."]'>";
                                           if($data[$i]["isadmin"] == "true") {
-                                            $tbody.="<tr><td><input name='delete[".$data[$i]["id"]."]' type='checkbox' /></td><td>".$data[$i]["id"]."</td><td><input name='users[".$data[$i]["id"]."]' type='text' value='".$data[$i]["email"]."' /></td><td>".$dept.$program_selection."</select></td><td><input type='checkbox' name='isAdmin[".$data[$i]["id"]."]' checked /></td></tr>";
+                                            $tbody.="<tr><td><input name='delete[".$data[$i]["id"]."]' type='checkbox' /></td><td>".$data[$i]["id"]."</td><td><input name='users[".$data[$i]["id"]."]' readonly type='text' value='".$data[$i]["email"]."' /></td><td>".$dept.$program_selection."</select></td><td><input type='checkbox' name='isAdmin[".$data[$i]["id"]."]' checked /></td></tr>";
                                           } else {
-                                            $tbody.="<tr><td><input name='delete[".$data[$i]["id"]."]' type='checkbox' /></td><td>".$data[$i]["id"]."</td><td><input name='users[".$data[$i]["id"]."]' type='text' value='".$data[$i]["email"]."' /></td><td>".$dept.$program_selection."</select></td><td><input type='checkbox' name='isAdmin[".$data[$i]["id"]."]' /></td></tr>";
+                                            $tbody.="<tr><td><input name='delete[".$data[$i]["id"]."]' type='checkbox' /></td><td>".$data[$i]["id"]."</td><td><input name='users[".$data[$i]["id"]."]' readonly type='text' value='".$data[$i]["email"]."' /></td><td>".$dept.$program_selection."</select></td><td><input type='checkbox' name='isAdmin[".$data[$i]["id"]."]' /></td></tr>";
                                           }
                                         }
                                         echo $tbody;
@@ -372,7 +372,7 @@ if(isset($_POST["users"])) {
                                           }
                                         }
                                         $dept = "<select id='program' name='programs[".$data[$i]["id"]."]'>";
-                                        $tbody.="<tr><td><input name='delete[".$data[$i]["id"]."]' type='hidden' /><input name='add[".$data[$i]["id"]."]' type='checkbox' /></td><td>".$data[$i]["id"]."</td><td><input name='users[".$data[$i]["id"]."]' type='text' value='".$data[$i]["email"]."' /></td><td>".$dept.$program_selection."</select></td></tr>";
+                                        $tbody.="<tr><td><input name='delete[".$data[$i]["id"]."]' type='hidden' /><input name='add[".$data[$i]["id"]."]' type='checkbox' /></td><td>".$data[$i]["id"]."</td><td><input name='users[".$data[$i]["id"]."]' disabled type='text' value='".$data[$i]["email"]."' /></td><td>".$dept.$program_selection."</select></td></tr>";
                                       }
                                       echo $tbody;
 
